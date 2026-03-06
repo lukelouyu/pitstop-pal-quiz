@@ -5,250 +5,761 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Which PitStop Pal Are You?</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #1e6aa8;
+      --dark-blue: #003664;
+      --yellow: #f2bb18;
+      --cream: #fffaf1;
+      --orange: #f47821;
+      --green: #31af73;
+      --pink: #f5c8c8;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #fff9f2;
-      color: #003664;
+      background:
+        radial-gradient(circle at top left, #ffe599 0%, #f2bb18 38%, #e9ad00 100%);
+      color: var(--dark-blue);
+      min-height: 100vh;
     }
 
     .page {
       min-height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       padding: 24px;
-      box-sizing: border-box;
     }
 
-    .card {
+    .shell {
       width: 100%;
-      max-width: 560px;
-      background: white;
-      border-radius: 24px;
-      padding: 28px;
-      box-sizing: border-box;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      text-align: center;
-      position: relative;
+      max-width: 860px;
+      background: rgba(255, 250, 241, 0.96);
+      border-radius: 34px;
+      box-shadow: var(--shadow);
       overflow: hidden;
+      position: relative;
+      backdrop-filter: blur(6px);
     }
 
-    .blob1, .blob2 {
+    .shell::before,
+    .shell::after {
+      content: "";
       position: absolute;
-      border-radius: 50%;
+      border-radius: 999px;
       opacity: 0.18;
-      z-index: 0;
+      pointer-events: none;
     }
 
-    .blob1 {
-      width: 160px;
-      height: 160px;
-      background: #1995eb;
-      top: -40px;
-      right: -40px;
+    .shell::before {
+      width: 220px;
+      height: 220px;
+      background: #4fbf88;
+      top: -60px;
+      right: -60px;
     }
 
-    .blob2 {
-      width: 140px;
-      height: 140px;
-      background: #f47821;
-      bottom: -30px;
-      left: -30px;
+    .shell::after {
+      width: 180px;
+      height: 180px;
+      background: #4ba3ff;
+      bottom: -50px;
+      left: -50px;
     }
 
-    .content {
+    #app {
       position: relative;
       z-index: 1;
+      padding: 28px;
     }
 
-    h1 {
-      margin-top: 0;
-      font-size: 2rem;
-      line-height: 1.2;
+    .screen {
+      animation: fadeUp 0.45s ease;
     }
 
-    h2 {
-      font-size: 1.35rem;
-      margin-bottom: 16px;
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    p {
-      line-height: 1.5;
+    @keyframes floaty {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.03);
+      }
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
     }
 
     .tag {
-      display: inline-block;
-      background: #f5c8c8;
-      color: #003664;
-      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: var(--dark-blue);
+      padding: 10px 14px;
       border-radius: 999px;
-      font-size: 0.9rem;
-      margin-bottom: 14px;
-    }
-
-    .progress {
-      margin: 12px 0 20px;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: bold;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
     }
 
-    button {
-      width: 100%;
+    .ghost-btn {
       border: none;
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-top: 12px;
-      font-size: 1rem;
+      background: #ffffff;
+      color: var(--dark-blue);
+      padding: 10px 14px;
+      border-radius: 999px;
       cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
       transition: 0.2s ease;
     }
 
-    button:hover {
+    .ghost-btn:hover {
       transform: translateY(-1px);
     }
 
-    .start-btn {
-      background: #f47821;
+    .hero-card {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .hero-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .hero-floating-btn {
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      border: none;
+      border-radius: 999px;
+      padding: 15px 24px;
+      background: var(--orange);
       color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(244, 120, 33, 0.32);
+      animation: pulseSoft 1.8s ease-in-out infinite;
+      transition: 0.2s ease;
+    }
+
+    .hero-floating-btn:hover {
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    .intro-copy {
+      text-align: center;
+      margin-top: 20px;
+      padding: 0 6px;
+    }
+
+    .intro-copy h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.05;
+    }
+
+    .intro-copy p {
+      margin: 0 auto;
+      max-width: 620px;
+      line-height: 1.55;
+      font-size: 1rem;
+    }
+
+    .info-strip {
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .floating-mascots {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .mini-mascot {
+      width: 72px;
+      height: 72px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      animation: floaty 3s ease-in-out infinite;
+    }
+
+    .mini-mascot:nth-child(2) {
+      animation-delay: 0.4s;
+    }
+
+    .mini-mascot:nth-child(3) {
+      animation-delay: 0.8s;
+    }
+
+    .mini-mascot img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .progress-wrap {
+      background: #fff;
+      padding: 16px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      margin-bottom: 18px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 0.96rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #eee8da;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #31af73, #1e6aa8);
+      transition: width 0.35s ease;
+    }
+
+    .question-card,
+    .result-card,
+    .all-pals-card {
+      background: #fff;
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    }
+
+    .question-card h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.45rem, 2.5vw, 2rem);
+      line-height: 1.2;
+    }
+
+    .question-sub {
+      margin: 0 0 20px;
+      color: #4a6480;
+      line-height: 1.5;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
 
     .option-btn {
-      background: #1995eb;
-      color: white;
-    }
-
-    .restart-btn {
-      background: #31af73;
-      color: white;
-      margin-top: 20px;
-    }
-
-    .pal-box {
-      margin-top: 20px;
+      width: 100%;
+      border: none;
+      border-radius: 22px;
+      background: #fffaf3;
       padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.22s ease;
+      border: 2px solid transparent;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .option-btn:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent, #1e6aa8);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    }
+
+    .option-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .option-avatar {
+      width: 58px;
+      height: 58px;
       border-radius: 18px;
-      background: #fff4e8;
+      background: var(--accent-soft, #eaf4ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
-    .pal-name {
-      font-size: 1.6rem;
+    .option-avatar img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+    }
+
+    .option-title {
       font-weight: bold;
-      margin-bottom: 8px;
+      color: var(--dark-blue);
+      font-size: 1rem;
     }
 
-    .tip {
-      margin-top: 12px;
+    .option-label {
+      font-size: 0.85rem;
+      color: #54708d;
+      margin-top: 2px;
+    }
+
+    .option-desc {
+      margin: 0;
+      line-height: 1.45;
+      color: #264867;
       font-size: 0.96rem;
+    }
+
+    .result-main {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 22px;
+      align-items: center;
+    }
+
+    .result-figure {
+      background: linear-gradient(180deg, #fff6e7, #fff);
+      border-radius: 28px;
+      padding: 18px;
+      text-align: center;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+    }
+
+    .result-figure img {
+      width: 100%;
+      max-width: 130px;
+      object-fit: contain;
+      animation: floaty 2.6s ease-in-out infinite;
+    }
+
+    .result-main h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      line-height: 1.1;
+    }
+
+    .result-main p {
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .pill {
+      display: inline-block;
+      margin-top: 14px;
+      background: #eef6ff;
+      color: var(--dark-blue);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: bold;
+    }
+
+    .tip-box {
+      margin-top: 18px;
+      background: #fff4e8;
+      border-left: 6px solid var(--orange);
+      border-radius: 18px;
+      padding: 16px 18px;
+      line-height: 1.55;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s ease;
+    }
+
+    .primary-btn {
+      background: var(--orange);
+      color: white;
+      box-shadow: 0 8px 18px rgba(244, 120, 33, 0.25);
+    }
+
+    .secondary-btn {
+      background: var(--green);
+      color: white;
+      box-shadow: 0 8px 18px rgba(49, 175, 115, 0.25);
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .all-pals-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .pal-mini-card {
+      background: #fff9f1;
+      border-radius: 22px;
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .pal-mini-card img {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .pal-mini-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--dark-blue);
+    }
+
+    .pal-mini-card span {
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: #44607b;
+    }
+
+    @media (max-width: 720px) {
+      #app {
+        padding: 18px;
+      }
+
+      .options,
+      .all-pals-grid,
+      .result-main {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-floating-btn {
+        width: calc(100% - 28px);
+        bottom: 14px;
+      }
+
+      .result-figure {
+        max-width: 220px;
+        margin: 0 auto;
+      }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="card">
-      <div class="blob1"></div>
-      <div class="blob2"></div>
-
-      <div class="content">
-        <div id="app"></div>
-      </div>
+    <div class="shell">
+      <div id="app"></div>
     </div>
   </div>
 
   <script>
-    const questions = [
-      {
-        q: "After a stressful day, what helps you most?",
-        a: [
-          { text: "Make a small plan for tomorrow", pal: "perry" },
-          { text: "Talk to someone I trust", pal: "iggy" }
-        ]
-      },
-      {
-        q: "When exams are coming, you usually...",
-        a: [
-          { text: "Remind yourself why your goals matter", pal: "ping" },
-          { text: "Take breaks to recharge", pal: "tobi" }
-        ]
-      },
-      {
-        q: "Your ideal reset activity is...",
-        a: [
-          { text: "Going for a walk or exercise", pal: "ola" },
-          { text: "Taking a good nap or sleeping early", pal: "sky" }
-        ]
-      },
-      {
-        q: "When you feel low energy, you...",
-        a: [
-          { text: "Grab a proper meal or snack", pal: "ty" },
-          { text: "Write down what you need to do next", pal: "perry" }
-        ]
-      }
-    ];
+    // Keep this filename exactly the same as your uploaded image.
+    // If you rename the file later, only change this line.
+    const START_IMAGE = "Event Tele Post Template.jpg";
 
-    const palResults = {
+    const pals = {
       perry: {
+        short: "Perry",
         name: "Perry — Personal Skills",
-        desc: "You stay grounded by organising the chaos. Small steps help you feel steadier.",
-        tip: "Try writing down your top 3 priorities for tomorrow."
+        badge: "Small steps, steady mind",
+        image: "perry.png",
+        color: "#f39a2b",
+        soft: "#fff1df",
+        desc: "You stay grounded by organising the chaos. Clear next steps help you feel calmer and more in control.",
+        tip: "Write down your top 3 priorities for tomorrow."
       },
       ping: {
+        short: "Ping",
         name: "Ping — Purpose",
-        desc: "You keep going by reconnecting to meaning and the bigger picture.",
-        tip: "Ask yourself: what matters most to me this week?"
+        badge: "Reconnect to meaning",
+        image: "ping.png",
+        color: "#4f9ff8",
+        soft: "#eaf4ff",
+        desc: "You recharge when you remember why something matters. Purpose helps you keep going even on difficult days.",
+        tip: "Ask yourself what matters most to you this week."
       },
       ola: {
+        short: "Ola",
         name: "Ola — On The Move",
-        desc: "Movement helps you reset. You feel better when your body gets to breathe.",
+        badge: "Move to reset",
+        image: "ola.png",
+        color: "#1b7fd0",
+        soft: "#e6f4ff",
+        desc: "Movement helps you breathe again. Walking, stretching, or getting outside gives you a healthier reset.",
         tip: "Take a 10-minute walk between study blocks."
       },
       ty: {
+        short: "Ty",
         name: "Ty — Thoughtful Eating",
-        desc: "You care for yourself through nourishment, energy, and gentle routines.",
-        tip: "Keep water and a simple snack nearby during long days."
+        badge: "Fuel matters too",
+        image: "ty.png",
+        color: "#f1c232",
+        soft: "#fff7d9",
+        desc: "You care for yourself through nourishment and simple routines. Your energy improves when your body is looked after.",
+        tip: "Keep water and a simple snack nearby during long work sessions."
       },
       sky: {
+        short: "Sky",
         name: "Sky — Sleep",
-        desc: "You know that rest is part of thriving, not a reward you have to earn.",
-        tip: "Try sleeping 20–30 minutes earlier tonight."
+        badge: "Rest is productive",
+        image: "sky.png",
+        color: "#84b8ef",
+        soft: "#eef7ff",
+        desc: "You know rest is not laziness. Good sleep helps you recover, think better, and feel more like yourself.",
+        tip: "Aim to sleep 20–30 minutes earlier tonight."
       },
       tobi: {
+        short: "Tobi",
         name: "Tobi — Timeout",
-        desc: "Pausing with intention helps you return to things with a clearer mind.",
-        tip: "Take a real 5-minute no-phone break today."
+        badge: "Pause with intention",
+        image: "tobi.png",
+        color: "#f1a7c1",
+        soft: "#fff0f6",
+        desc: "Pausing helps you return with a clearer mind. You value space, hobbies, and moments of real recovery.",
+        tip: "Take one proper 5-minute no-phone break today."
       },
       iggy: {
+        short: "Iggy",
         name: "Iggy — Interaction",
-        desc: "You find strength through connection, support, and being around people who care.",
+        badge: "Connection gives strength",
+        image: "iggy.png",
+        color: "#35c178",
+        soft: "#e9fff2",
+        desc: "You feel better through connection. Talking, sharing, and being around people you trust helps you feel supported.",
         tip: "Check in with one friend today."
       }
     };
 
+    const questions = [
+      {
+        q: "After a stressful day, what usually helps you most?",
+        sub: "Pick the one that feels most like your natural reaction.",
+        a: [
+          {
+            text: "Make a small plan for tomorrow so things feel more manageable.",
+            pal: "perry"
+          },
+          {
+            text: "Talk to someone I trust and feel less alone in it.",
+            pal: "iggy"
+          }
+        ]
+      },
+      {
+        q: "When exam season starts getting intense, you usually try to...",
+        sub: "Go with the answer you do most often, not the ideal one.",
+        a: [
+          {
+            text: "Reconnect with your goals and remind yourself why this matters.",
+            pal: "ping"
+          },
+          {
+            text: "Step back for a while and give your brain a real pause.",
+            pal: "tobi"
+          }
+        ]
+      },
+      {
+        q: "Your ideal quick reset looks like...",
+        sub: "What would make you feel a bit better in the next 15 minutes?",
+        a: [
+          {
+            text: "Walking, stretching, or doing something active.",
+            pal: "ola"
+          },
+          {
+            text: "Sleeping, napping, or lying down to recharge.",
+            pal: "sky"
+          }
+        ]
+      },
+      {
+        q: "When your energy suddenly drops, you are more likely to...",
+        sub: "Choose the first instinct that sounds true.",
+        a: [
+          {
+            text: "Grab food, water, or something to properly refuel.",
+            pal: "ty"
+          },
+          {
+            text: "List out the next few steps so your mind feels clearer.",
+            pal: "perry"
+          }
+        ]
+      },
+      {
+        q: "When things feel heavy, you are most encouraged by...",
+        sub: "Which one helps you keep moving?",
+        a: [
+          {
+            text: "A reminder that what I am doing still has meaning.",
+            pal: "ping"
+          },
+          {
+            text: "Someone being there with me, even in a small way.",
+            pal: "iggy"
+          }
+        ]
+      },
+      {
+        q: "A weekend wellness moment that sounds best to you is...",
+        sub: "Choose the option that feels most recharging.",
+        a: [
+          {
+            text: "Going outdoors, moving around, and changing my environment.",
+            pal: "ola"
+          },
+          {
+            text: "Taking a quiet break and switching off for a while.",
+            pal: "tobi"
+          }
+        ]
+      }
+    ];
+
     let currentQuestion = -1;
-    let scores = {
-      perry: 0,
-      ping: 0,
-      ola: 0,
-      ty: 0,
-      sky: 0,
-      tobi: 0,
-      iggy: 0
-    };
+    let answerHistory = [];
+    let scores = createEmptyScores();
+    let lastResultKey = null;
 
     const app = document.getElementById("app");
 
+    function createEmptyScores() {
+      return {
+        perry: 0,
+        ping: 0,
+        ola: 0,
+        ty: 0,
+        sky: 0,
+        tobi: 0,
+        iggy: 0
+      };
+    }
+
+    function render(html) {
+      app.innerHTML = html;
+    }
+
     function showStart() {
-      app.innerHTML = `
-        <div class="tag">NUS PSS Wellness Quiz</div>
-        <h1>Which PitStop Pal Are You?</h1>
-        <p>Answer a few quick questions and discover your natural wellness style.</p>
-        <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
-      `;
+      render(`
+        <div class="screen">
+          <div class="top-row">
+            <div class="tag">🌼 NUS PSS Wellness Quiz</div>
+          </div>
+
+          <div class="hero-card">
+            <img src="${START_IMAGE}" alt="PitStop Pal event poster start screen">
+            <button class="hero-floating-btn" onclick="startQuiz()">Start Quiz</button>
+          </div>
+
+          <div class="intro-copy">
+            <h1>Which PitStop Pal Are You?</h1>
+            <p>
+              Answer a few quick questions and discover the PitStop Pal
+              that matches your natural wellness style.
+            </p>
+
+            <div class="info-strip">
+              <div class="chip">⏱ Around 1 minute</div>
+              <div class="chip">🎯 6 quick questions</div>
+              <div class="chip">💛 Find your wellness match</div>
+            </div>
+
+            <div class="floating-mascots">
+              <div class="mini-mascot"><img src="perry.png" alt="Perry"></div>
+              <div class="mini-mascot"><img src="ola.png" alt="Ola"></div>
+              <div class="mini-mascot"><img src="iggy.png" alt="Iggy"></div>
+            </div>
+          </div>
+        </div>
+      `);
     }
 
     function startQuiz() {
       currentQuestion = 0;
+      scores = createEmptyScores();
+      answerHistory = [];
       showQuestion();
     }
 
@@ -259,49 +770,161 @@
       }
 
       const item = questions[currentQuestion];
-      app.innerHTML = `
-        <div class="tag">Campus Cruise</div>
-        <div class="progress">Question ${currentQuestion + 1} of ${questions.length}</div>
-        <h2>${item.q}</h2>
-        ${item.a.map(opt => `
-          <button class="option-btn" onclick="chooseAnswer('${opt.pal}')">${opt.text}</button>
-        `).join("")}
-      `;
+      const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+      render(`
+        <div class="screen">
+          <div class="top-row">
+            <div class="tag">🚏 Campus Cruise</div>
+            <button class="ghost-btn" onclick="showStart()">Back to start</button>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span>Question ${currentQuestion + 1} of ${questions.length}</span>
+              <span>${Math.round(progress)}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+          </div>
+
+          <div class="question-card">
+            <h2>${item.q}</h2>
+            <p class="question-sub">${item.sub}</p>
+
+            <div class="options">
+              ${item.a.map((opt, index) => {
+                const pal = pals[opt.pal];
+                return `
+                  <button
+                    class="option-btn"
+                    style="--accent:${pal.color}; --accent-soft:${pal.soft};"
+                    onclick="chooseAnswer(${index})"
+                  >
+                    <div class="option-top">
+                      <div class="option-avatar">
+                        <img src="${pal.image}" alt="${pal.short}">
+                      </div>
+                      <div>
+                        <div class="option-title">${pal.short}</div>
+                        <div class="option-label">${pal.badge}</div>
+                      </div>
+                    </div>
+                    <p class="option-desc">${opt.text}</p>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+      `);
     }
 
-    function chooseAnswer(pal) {
-      scores[pal]++;
-      currentQuestion++;
+    function chooseAnswer(optionIndex) {
+      const selected = questions[currentQuestion].a[optionIndex];
+      scores[selected.pal] += 1;
+      answerHistory.push(selected.pal);
+      currentQuestion += 1;
       showQuestion();
     }
 
-    function showResult() {
-      const topPal = Object.keys(scores).reduce((a, b) => scores[a] >= scores[b] ? a : b);
-      const result = palResults[topPal];
+    function getTopPal() {
+      const maxScore = Math.max(...Object.values(scores));
+      const tied = Object.keys(scores).filter(key => scores[key] === maxScore);
 
-      app.innerHTML = `
-        <div class="tag">Your result</div>
-        <h1>You got:</h1>
-        <div class="pal-box">
-          <div class="pal-name">${result.name}</div>
-          <p>${result.desc}</p>
-          <p class="tip"><b>Try this:</b> ${result.tip}</p>
+      if (tied.length === 1) {
+        return tied[0];
+      }
+
+      // Tie-breaker: use the most recent matching answer
+      for (let i = answerHistory.length - 1; i >= 0; i--) {
+        if (tied.includes(answerHistory[i])) {
+          return answerHistory[i];
+        }
+      }
+
+      return tied[0];
+    }
+
+    function showResult() {
+      const topPal = getTopPal();
+      lastResultKey = topPal;
+      const result = pals[topPal];
+
+      render(`
+        <div class="screen">
+          <div class="top-row">
+            <div class="tag">✨ Your PitStop Pal</div>
+            <button class="ghost-btn" onclick="showStart()">Home</button>
+          </div>
+
+          <div class="result-card">
+            <div class="result-main">
+              <div class="result-figure">
+                <img src="${result.image}" alt="${result.short}">
+              </div>
+
+              <div>
+                <h1>${result.name}</h1>
+                <p>${result.desc}</p>
+                <div class="pill">${result.badge}</div>
+              </div>
+            </div>
+
+            <div class="tip-box">
+              <strong>Try this today:</strong> ${result.tip}
+            </div>
+
+            <div class="result-actions">
+              <button class="secondary-btn" onclick="resetQuiz()">Try Again</button>
+              <button class="primary-btn" onclick="showAllPals()">Meet All the Pals</button>
+            </div>
+          </div>
         </div>
-        <button class="restart-btn" onclick="resetQuiz()">Try Again</button>
-      `;
+      `);
+    }
+
+    function showAllPals() {
+      render(`
+        <div class="screen">
+          <div class="top-row">
+            <div class="tag">🌟 Meet the Pals</div>
+            <button class="ghost-btn" onclick="${lastResultKey ? 'showResult()' : 'showStart()'}">
+              ${lastResultKey ? 'Back to result' : 'Back'}
+            </button>
+          </div>
+
+          <div class="all-pals-card">
+            <h2 style="margin-top:0;">All PitStop Pals</h2>
+            <p class="question-sub" style="margin-bottom:18px;">
+              Each Pal represents a different way of caring for your well-being.
+            </p>
+
+            <div class="all-pals-grid">
+              ${Object.keys(pals).map(key => {
+                const pal = pals[key];
+                return `
+                  <div class="pal-mini-card">
+                    <img src="${pal.image}" alt="${pal.short}">
+                    <div>
+                      <strong>${pal.name}</strong>
+                      <span>${pal.badge}</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+      `);
     }
 
     function resetQuiz() {
       currentQuestion = -1;
-      scores = {
-        perry: 0,
-        ping: 0,
-        ola: 0,
-        ty: 0,
-        sky: 0,
-        tobi: 0,
-        iggy: 0
-      };
+      answerHistory = [];
+      scores = createEmptyScores();
+      lastResultKey = null;
       showStart();
     }
 
