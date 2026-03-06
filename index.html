@@ -184,20 +184,43 @@
       font-size: 1rem;
     }
 
-    .start-btn-below {
-      margin-top: 18px;
-      border: none;
-      border-radius: 999px;
-      padding: 15px 28px;
-      background: var(--orange);
-      color: white;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(244, 120, 33, 0.32);
-      animation: pulseSoft 1.8s ease-in-out infinite;
-      transition: 0.2s ease;
-    }
+
+    .start-btn-wrap {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.start-btn-below {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 28px;
+  border: none;
+  border-radius: 999px;
+  background: #f47821;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(244, 120, 33, 0.32);
+  animation: pulseSoft 1.8s ease-in-out infinite;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.start-btn-below:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(244, 120, 33, 0.36);
+}
+
+.start-btn-below:active {
+  transform: translateY(0);
+}
 
     .start-btn-below:hover {
       transform: translateY(-2px);
@@ -727,7 +750,9 @@
               that matches your natural wellness style.
             </p>
 
-            <button class="start-btn-below" onclick="startQuiz()">Start Quiz</button>
+            <div class="start-btn-wrap">
+  <button class="start-btn-below" onclick="startQuiz()">Start Quiz</button>
+</div>
 
             <div class="info-strip">
               <div class="chip">⏱ Around 1 minute</div>
