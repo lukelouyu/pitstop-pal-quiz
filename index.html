@@ -26,8 +26,7 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, #ffe599 0%, #f2bb18 38%, #e9ad00 100%);
+      background: radial-gradient(circle at top left, #ffe599 0%, #f2bb18 38%, #e9ad00 100%);
       color: var(--dark-blue);
       min-height: 100vh;
     }
@@ -154,7 +153,6 @@
     }
 
     .hero-card {
-      position: relative;
       border-radius: var(--radius-xl);
       overflow: hidden;
       background: #fff;
@@ -165,28 +163,6 @@
       display: block;
       width: 100%;
       height: auto;
-    }
-
-    .hero-floating-btn {
-      position: absolute;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      border: none;
-      border-radius: 999px;
-      padding: 15px 24px;
-      background: var(--orange);
-      color: white;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(244, 120, 33, 0.32);
-      animation: pulseSoft 1.8s ease-in-out infinite;
-      transition: 0.2s ease;
-    }
-
-    .hero-floating-btn:hover {
-      transform: translateX(-50%) translateY(-2px);
     }
 
     .intro-copy {
@@ -206,6 +182,25 @@
       max-width: 620px;
       line-height: 1.55;
       font-size: 1rem;
+    }
+
+    .start-btn-below {
+      margin-top: 18px;
+      border: none;
+      border-radius: 999px;
+      padding: 15px 28px;
+      background: var(--orange);
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(244, 120, 33, 0.32);
+      animation: pulseSoft 1.8s ease-in-out infinite;
+      transition: 0.2s ease;
+    }
+
+    .start-btn-below:hover {
+      transform: translateY(-2px);
     }
 
     .info-strip {
@@ -514,11 +509,6 @@
         grid-template-columns: 1fr;
       }
 
-      .hero-floating-btn {
-        width: calc(100% - 28px);
-        bottom: 14px;
-      }
-
       .result-figure {
         max-width: 220px;
         margin: 0 auto;
@@ -534,8 +524,6 @@
   </div>
 
   <script>
-    // Keep this filename exactly the same as your uploaded image.
-    // If you rename the file later, only change this line.
     const START_IMAGE = "Event Tele Post.png";
 
     const pals = {
@@ -729,19 +717,17 @@
           </div>
 
           <div class="hero-card">
-             <img src="${START_IMAGE}" alt="PitStop Pal event poster start screen">
+            <img src="${START_IMAGE}" alt="PitStop Pal event poster start screen">
           </div>
 
           <div class="intro-copy">
-  <h1>Which PitStop Pal Are You?</h1>
-  <p>
-    Answer a few quick questions and discover the PitStop Pal
-    that matches your natural wellness style.
-  </p>
+            <h1>Which PitStop Pal Are You?</h1>
+            <p>
+              Answer a few quick questions and discover the PitStop Pal
+              that matches your natural wellness style.
+            </p>
 
-  <button class="start-btn-below" onclick="startQuiz()">Start Quiz</button>
-
-  <div class="info-strip">
+            <button class="start-btn-below" onclick="startQuiz()">Start Quiz</button>
 
             <div class="info-strip">
               <div class="chip">⏱ Around 1 minute</div>
@@ -840,7 +826,6 @@
         return tied[0];
       }
 
-      // Tie-breaker: use the most recent matching answer
       for (let i = answerHistory.length - 1; i >= 0; i--) {
         if (tied.includes(answerHistory[i])) {
           return answerHistory[i];
