@@ -51,69 +51,90 @@ document.addEventListener("DOMContentLoaded", () => {
     screen.classList.remove("hidden");
   }
 
-function startQuiz() {
-  currentQuestionIndex = 0;
-  scores = createEmptyScores();
-  answerHistory = [];
-  showScreen(quizScreen);
-  renderQuestion();
-}
-
- function renderQuestion() {
-  if (!Array.isArray(questions) || questions.length === 0) {
+  function showDataError(message) {
+    showScreen(quizScreen);
     questionTitle.textContent = "Quiz data not loaded";
-    questionSub.textContent = "Please check data.js filename, path, or syntax.";
+    questionSub.textContent = message;
     optionsContainer.innerHTML = "";
-    return;
+    progressText.textContent = "Question 0 of 0";
+    progressPercent.textContent = "0%";
+    progressFill.style.width = "0%";
   }
 
-  const item = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  function startQuiz() {
+    console.log("Start Quiz clicked");
 
-  progressText.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-  progressPercent.textContent = `${Math.round(progress)}%`;
-  progressFill.style.width = `${progress}%`;
+    currentQuestionIndex = 0;
+    scores = createEmptyScores();
+    answerHistory = [];
+    showScreen(quizScreen);
+    renderQuestion();
+  }
 
-  questionTitle.textContent = item.q;
-  questionSub.textContent = item.sub;
-  optionsContainer.innerHTML = "";
+  function renderQuestion() {
+    if (typeof questions === "undefined") {
+      showDataError("questions is missing. Please check that data.js is uploaded and linked correctly.");
+      return;
+    }
 
-  item.a.forEach((opt) => {
-    const pal = pals[opt.pal];
+    if (typeof pals === "undefined") {
+      showDataError("pals is missing. Please check data.js for errors.");
+      return;
+    }
 
-    const button = document.createElement("button");
-    button.className = "option-btn";
-    button.style.setProperty("--accent", pal.color);
-    button.style.setProperty("--accent-soft", pal.soft);
+    if (!Array.isArray(questions) || questions.length === 0) {
+      showDataError("No quiz questions found in data.js.");
+      return;
+    }
 
-    button.innerHTML = `
-      <div class="option-top">
-        <div class="option-avatar">
-          <img src="${pal.image}" alt="${pal.short}">
+    const item = questions[currentQuestionIndex];
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+    progressText.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+    progressPercent.textContent = `${Math.round(progress)}%`;
+    progressFill.style.width = `${progress}%`;
+
+    questionTitle.textContent = item.q;
+    questionSub.textContent = item.sub;
+    optionsContainer.innerHTML = "";
+
+    item.a.forEach((opt) => {
+      const pal = pals[opt.pal];
+
+      const button = document.createElement("button");
+      button.className = "option-btn";
+      button.style.setProperty("--accent", pal.color);
+      button.style.setProperty("--accent-soft", pal.soft);
+
+      button.innerHTML = `
+        <div class="option-top">
+          <div class="option-avatar">
+            <img src="${pal.image}" alt="${pal.short}">
+          </div>
+          <div>
+            <div class="option-title">${pal.short}</div>
+            <div class="option-label">${pal.badge}</div>
+          </div>
         </div>
-        <div>
-          <div class="option-title">${pal.short}</div>
-          <div class="option-label">${pal.badge}</div>
-        </div>
-      </div>
-      <p class="option-desc">${opt.text}</p>
-    `;
+        <p class="option-desc">${opt.text}</p>
+      `;
 
-    button.addEventListener("click", () => {
-      scores[opt.pal] += opt.points;
-      answerHistory.push(opt.pal);
-      currentQuestionIndex += 1;
+      button.addEventListener("click", () => {
+        scores[opt.pal] += opt.points;
+        answerHistory.push(opt.pal);
+        currentQuestionIndex += 1;
 
-      if (currentQuestionIndex < questions.length) {
-        renderQuestion();
-      } else {
-        showResult();
-      }
+        if (currentQuestionIndex < questions.length) {
+          renderQuestion();
+        } else {
+          showResult();
+        }
+      });
+
+      optionsContainer.appendChild(button);
     });
+  }
 
-    optionsContainer.appendChild(button);
-  });
-}
   function getTopPal() {
     const maxScore = Math.max(...Object.values(scores));
     const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
