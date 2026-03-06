@@ -3,73 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Campus Cruise – Which PitStop Pal Are You?</title>
+  <title>Which PitStop Pal Are You?</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <main class="quiz-card">
-
-      <!-- Start Screen -->
-      <section id="start-screen" class="screen active">
-        <p class="eyebrow">PitStop Pal Quiz</p>
-        <h1>Campus Cruise – Which PitStop Pal Are You?</h1>
-        <p class="lead">
-          You’re sailing through a new academic semester aboard the Campus Cruise,
-          docking at familiar NUS hotspots along the way.
-        </p>
-        <p class="sublead">
-          Answer 14 questions and discover your most natural coping strength.
-        </p>
-        <button id="start-btn" class="btn btn-primary">Start Quiz</button>
-      </section>
-
-      <!-- Quiz Screen -->
-      <section id="quiz-screen" class="screen hidden">
-        <div class="progress-wrap">
-          <div class="progress-top">
-            <span id="progress-text">Question 1 of 14</span>
-            <span id="progress-percent">7%</span>
-          </div>
-          <div class="progress-bar">
-            <div id="progress-fill" class="progress-fill"></div>
-          </div>
-        </div>
-
-        <div class="question-panel">
-          <p id="question-theme" class="question-theme"></p>
-          <h2 id="question-title" class="question-title"></h2>
-          <p id="question-prompt" class="question-prompt"></p>
-          <div id="options-container" class="options-container"></div>
-        </div>
-      </section>
-
-      <!-- Result Screen -->
-      <section id="result-screen" class="screen hidden">
-        <p class="eyebrow">Your most natural coping strength</p>
-        <h2>Your PitStop Pal is...</h2>
-        <h1 id="result-pal-name" class="result-name"></h1>
-        <p id="result-pal-tagline" class="result-tagline"></p>
-        <p id="result-pal-description" class="result-description"></p>
-
-        <div class="result-box">
-          <h3>Try it today</h3>
-          <p id="result-action-tip"></p>
-        </div>
-
-        <!-- requested position: below Try it today, above Try Again -->
-        <div class="result-box">
-          <h3>Final Score</h3>
-          <div id="final-score-list" class="final-score-list"></div>
-        </div>
-
-        <button id="restart-btn" class="btn btn-secondary">Try Again</button>
-      </section>
-
-    </main>
+  <div class="page">
+    <div class="shell">
+      <div id="app"></div>
+    </div>
   </div>
 
-  <!-- data.js must come before script.js -->
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>
