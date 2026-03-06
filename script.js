@@ -51,63 +51,69 @@ document.addEventListener("DOMContentLoaded", () => {
     screen.classList.remove("hidden");
   }
 
-  function startQuiz() {
-    currentQuestionIndex = 0;
-    scores = createEmptyScores();
-    answerHistory = [];
-    renderQuestion();
-    showScreen(quizScreen);
-  }
+function startQuiz() {
+  currentQuestionIndex = 0;
+  scores = createEmptyScores();
+  answerHistory = [];
+  showScreen(quizScreen);
+  renderQuestion();
+}
 
-  function renderQuestion() {
-    const item = questions[currentQuestionIndex];
-    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-
-    progressText.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-    progressPercent.textContent = `${Math.round(progress)}%`;
-    progressFill.style.width = `${progress}%`;
-
-    questionTitle.textContent = item.q;
-    questionSub.textContent = item.sub;
+ function renderQuestion() {
+  if (!Array.isArray(questions) || questions.length === 0) {
+    questionTitle.textContent = "Quiz data not loaded";
+    questionSub.textContent = "Please check data.js filename, path, or syntax.";
     optionsContainer.innerHTML = "";
-
-    item.a.forEach((opt) => {
-      const pal = pals[opt.pal];
-
-      const button = document.createElement("button");
-      button.className = "option-btn";
-      button.style.setProperty("--accent", pal.color);
-      button.style.setProperty("--accent-soft", pal.soft);
-
-      button.innerHTML = `
-        <div class="option-top">
-          <div class="option-avatar">
-            <img src="${pal.image}" alt="${pal.short}">
-          </div>
-          <div>
-            <div class="option-title">${pal.short}</div>
-            <div class="option-label">${pal.badge}</div>
-          </div>
-        </div>
-        <p class="option-desc">${opt.text}</p>
-      `;
-
-      button.addEventListener("click", () => {
-        scores[opt.pal] += opt.points;
-        answerHistory.push(opt.pal);
-        currentQuestionIndex += 1;
-
-        if (currentQuestionIndex < questions.length) {
-          renderQuestion();
-        } else {
-          showResult();
-        }
-      });
-
-      optionsContainer.appendChild(button);
-    });
+    return;
   }
 
+  const item = questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  progressText.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+  progressPercent.textContent = `${Math.round(progress)}%`;
+  progressFill.style.width = `${progress}%`;
+
+  questionTitle.textContent = item.q;
+  questionSub.textContent = item.sub;
+  optionsContainer.innerHTML = "";
+
+  item.a.forEach((opt) => {
+    const pal = pals[opt.pal];
+
+    const button = document.createElement("button");
+    button.className = "option-btn";
+    button.style.setProperty("--accent", pal.color);
+    button.style.setProperty("--accent-soft", pal.soft);
+
+    button.innerHTML = `
+      <div class="option-top">
+        <div class="option-avatar">
+          <img src="${pal.image}" alt="${pal.short}">
+        </div>
+        <div>
+          <div class="option-title">${pal.short}</div>
+          <div class="option-label">${pal.badge}</div>
+        </div>
+      </div>
+      <p class="option-desc">${opt.text}</p>
+    `;
+
+    button.addEventListener("click", () => {
+      scores[opt.pal] += opt.points;
+      answerHistory.push(opt.pal);
+      currentQuestionIndex += 1;
+
+      if (currentQuestionIndex < questions.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    optionsContainer.appendChild(button);
+  });
+}
   function getTopPal() {
     const maxScore = Math.max(...Object.values(scores));
     const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
