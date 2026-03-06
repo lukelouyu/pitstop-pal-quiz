@@ -1,254 +1,200 @@
-let currentQuestion = -1;
-let answerHistory = [];
-let scores = createEmptyScores();
-let lastResultKey = null;
+document.addEventListener("DOMContentLoaded", () => {
+  const startScreen = document.getElementById("start-screen");
+  const quizScreen = document.getElementById("quiz-screen");
+  const resultScreen = document.getElementById("result-screen");
+  const allPalsScreen = document.getElementById("all-pals-screen");
 
-const app = document.getElementById("app");
+  const startBtn = document.getElementById("start-btn");
+  const backHomeBtn = document.getElementById("back-home-btn");
+  const resultHomeBtn = document.getElementById("result-home-btn");
+  const retryBtn = document.getElementById("retry-btn");
+  const meetPalsBtn = document.getElementById("meet-pals-btn");
+  const backResultBtn = document.getElementById("back-result-btn");
 
-function createEmptyScores() {
-  return {
-    perry: 0,
-    ping: 0,
-    ola: 0,
-    ty: 0,
-    sky: 0,
-    tobi: 0,
-    iggy: 0
-  };
-}
+  const progressText = document.getElementById("progress-text");
+  const progressPercent = document.getElementById("progress-percent");
+  const progressFill = document.getElementById("progress-fill");
 
-function render(html) {
-  app.innerHTML = html;
-}
+  const questionTitle = document.getElementById("question-title");
+  const questionSub = document.getElementById("question-sub");
+  const optionsContainer = document.getElementById("options-container");
 
-function showStart() {
-  render(`
-    <div class="screen">
-      <div class="top-row">
-        <div class="tag">🌼 NUS PSS Wellness Quiz</div>
-      </div>
+  const resultImage = document.getElementById("result-image");
+  const resultName = document.getElementById("result-name");
+  const resultDesc = document.getElementById("result-desc");
+  const resultBadge = document.getElementById("result-badge");
+  const resultTip = document.getElementById("result-tip");
+  const finalScoreList = document.getElementById("final-score-list");
+  const allPalsGrid = document.getElementById("all-pals-grid");
 
-      <div class="hero-card">
-        <img src="${START_IMAGE}" alt="PitStop Pal event poster start screen">
-      </div>
+  let currentQuestionIndex = 0;
+  let lastResultKey = null;
+  let scores = createEmptyScores();
+  let answerHistory = [];
 
-      <div class="intro-copy">
-        <h1>Which PitStop Pal Are You?</h1>
-        <p>
-          Answer a few quick questions and discover the PitStop Pal
-          that matches your natural wellness style.
-        </p>
-
-        <div class="start-btn-wrap">
-          <button class="start-btn-below" onclick="startQuiz()">Start Quiz</button>
-        </div>
-
-        <div class="info-strip">
-          <div class="chip">⏱ Around 2–3 minutes</div>
-          <div class="chip">🎯 14 questions</div>
-          <div class="chip">💛 Find your wellness match</div>
-        </div>
-
-        <div class="floating-mascots">
-          <div class="mini-mascot"><img src="perry.png" alt="Perry"></div>
-          <div class="mini-mascot"><img src="ola.png" alt="Ola"></div>
-          <div class="mini-mascot"><img src="iggy.png" alt="Iggy"></div>
-        </div>
-      </div>
-    </div>
-  `);
-}
-
-function startQuiz() {
-  currentQuestion = 0;
-  scores = createEmptyScores();
-  answerHistory = [];
-  showQuestion();
-}
-
-function showQuestion() {
-  if (currentQuestion >= questions.length) {
-    showResult();
-    return;
+  function createEmptyScores() {
+    return {
+      perry: 0,
+      ping: 0,
+      ola: 0,
+      ty: 0,
+      sky: 0,
+      tobi: 0,
+      iggy: 0
+    };
   }
 
-  const item = questions[currentQuestion];
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  function showScreen(screen) {
+    [startScreen, quizScreen, resultScreen, allPalsScreen].forEach((section) => {
+      section.classList.add("hidden");
+    });
+    screen.classList.remove("hidden");
+  }
 
-  render(`
-    <div class="screen">
-      <div class="top-row">
-        <div class="tag">🚏 Campus Cruise</div>
-        <button class="ghost-btn" onclick="showStart()">Back to start</button>
-      </div>
+  function startQuiz() {
+    currentQuestionIndex = 0;
+    scores = createEmptyScores();
+    answerHistory = [];
+    renderQuestion();
+    showScreen(quizScreen);
+  }
 
-      <div class="progress-wrap">
-        <div class="progress-label">
-          <span>Question ${currentQuestion + 1} of ${questions.length}</span>
-          <span>${Math.round(progress)}%</span>
+  function renderQuestion() {
+    const item = questions[currentQuestionIndex];
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+    progressText.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+    progressPercent.textContent = `${Math.round(progress)}%`;
+    progressFill.style.width = `${progress}%`;
+
+    questionTitle.textContent = item.q;
+    questionSub.textContent = item.sub;
+    optionsContainer.innerHTML = "";
+
+    item.a.forEach((opt) => {
+      const pal = pals[opt.pal];
+
+      const button = document.createElement("button");
+      button.className = "option-btn";
+      button.style.setProperty("--accent", pal.color);
+      button.style.setProperty("--accent-soft", pal.soft);
+
+      button.innerHTML = `
+        <div class="option-top">
+          <div class="option-avatar">
+            <img src="${pal.image}" alt="${pal.short}">
+          </div>
+          <div>
+            <div class="option-title">${pal.short}</div>
+            <div class="option-label">${pal.badge}</div>
+          </div>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${progress}%"></div>
-        </div>
-      </div>
+        <p class="option-desc">${opt.text}</p>
+      `;
 
-      <div class="question-card">
-        <h2>${item.q}</h2>
-        <p class="question-sub">${item.sub}</p>
+      button.addEventListener("click", () => {
+        scores[opt.pal] += opt.points;
+        answerHistory.push(opt.pal);
+        currentQuestionIndex += 1;
 
-        <div class="options">
-          ${item.a.map((opt, index) => {
-            const pal = pals[opt.pal];
-            return `
-              <button
-                class="option-btn"
-                style="--accent:${pal.color}; --accent-soft:${pal.soft};"
-                onclick="chooseAnswer(${index})"
-              >
-                <div class="option-top">
-                  <div class="option-avatar">
-                    <img src="${pal.image}" alt="${pal.short}">
-                  </div>
-                  <div>
-                    <div class="option-title">${pal.short}</div>
-                    <div class="option-label">${pal.badge}</div>
-                  </div>
-                </div>
-                <p class="option-desc">${opt.text}</p>
-              </button>
-            `;
-          }).join("")}
-        </div>
-      </div>
-    </div>
-  `);
-}
+        if (currentQuestionIndex < questions.length) {
+          renderQuestion();
+        } else {
+          showResult();
+        }
+      });
 
-function chooseAnswer(optionIndex) {
-  const selected = questions[currentQuestion].a[optionIndex];
-  scores[selected.pal] += selected.points;
-  answerHistory.push(selected.pal);
-  currentQuestion += 1;
-  showQuestion();
-}
+      optionsContainer.appendChild(button);
+    });
+  }
 
-function getTopPal() {
-  const maxScore = Math.max(...Object.values(scores));
-  const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
+  function getTopPal() {
+    const maxScore = Math.max(...Object.values(scores));
+    const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
 
-  if (tied.length === 1) {
+    if (tied.length === 1) {
+      return tied[0];
+    }
+
+    for (let i = answerHistory.length - 1; i >= 0; i--) {
+      if (tied.includes(answerHistory[i])) {
+        return answerHistory[i];
+      }
+    }
+
     return tied[0];
   }
 
-  for (let i = answerHistory.length - 1; i >= 0; i--) {
-    if (tied.includes(answerHistory[i])) {
-      return answerHistory[i];
-    }
+  function renderFinalScores() {
+    finalScoreList.innerHTML = "";
+
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+    sorted.forEach(([key, value]) => {
+      const row = document.createElement("div");
+      row.className = "score-row";
+      row.innerHTML = `<strong>${pals[key].short}</strong><span>${value}</span>`;
+      finalScoreList.appendChild(row);
+    });
   }
 
-  return tied[0];
-}
+  function showResult() {
+    const topPal = getTopPal();
+    const result = pals[topPal];
+    lastResultKey = topPal;
 
-function renderFinalScores() {
-  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    resultImage.src = result.image;
+    resultImage.alt = result.short;
+    resultName.textContent = result.name;
+    resultDesc.textContent = result.desc;
+    resultBadge.textContent = result.badge;
+    resultTip.textContent = result.tip;
 
-  return sorted.map(([key, value]) => {
-    const pal = pals[key];
-    return `
-      <div class="score-row">
-        <strong>${pal.short}</strong>
-        <span>${value}</span>
-      </div>
-    `;
-  }).join("");
-}
+    renderFinalScores();
+    showScreen(resultScreen);
+  }
 
-function showResult() {
-  const topPal = getTopPal();
-  lastResultKey = topPal;
-  const result = pals[topPal];
+  function renderAllPals() {
+    allPalsGrid.innerHTML = "";
 
-  render(`
-    <div class="screen">
-      <div class="top-row">
-        <div class="tag">✨ Your PitStop Pal</div>
-        <button class="ghost-btn" onclick="showStart()">Home</button>
-      </div>
+    Object.keys(pals).forEach((key) => {
+      const pal = pals[key];
 
-      <div class="result-card">
-        <div class="result-main">
-          <div class="result-figure">
-            <img src="${result.image}" alt="${result.short}">
-          </div>
-
-          <div>
-            <h1>${result.name}</h1>
-            <p>${result.desc}</p>
-            <div class="pill">${result.badge}</div>
-          </div>
+      const card = document.createElement("div");
+      card.className = "pal-mini-card";
+      card.innerHTML = `
+        <img src="${pal.image}" alt="${pal.short}">
+        <div>
+          <strong>${pal.name}</strong>
+          <span>${pal.badge}</span>
         </div>
+      `;
+      allPalsGrid.appendChild(card);
+    });
+  }
 
-        <div class="tip-box">
-          <strong>Try this today:</strong> ${result.tip}
-        </div>
+  function resetToStart() {
+    currentQuestionIndex = 0;
+    scores = createEmptyScores();
+    answerHistory = [];
+    showScreen(startScreen);
+  }
 
-        <div class="score-box">
-          <h3>Final Score</h3>
-          <div class="final-score-list">
-            ${renderFinalScores()}
-          </div>
-        </div>
+  startBtn.addEventListener("click", startQuiz);
+  backHomeBtn.addEventListener("click", resetToStart);
+  resultHomeBtn.addEventListener("click", resetToStart);
+  retryBtn.addEventListener("click", startQuiz);
+  meetPalsBtn.addEventListener("click", () => {
+    renderAllPals();
+    showScreen(allPalsScreen);
+  });
+  backResultBtn.addEventListener("click", () => {
+    if (lastResultKey) {
+      showScreen(resultScreen);
+    } else {
+      showScreen(startScreen);
+    }
+  });
 
-        <div class="result-actions">
-          <button class="secondary-btn" onclick="resetQuiz()">Try Again</button>
-          <button class="primary-btn" onclick="showAllPals()">Meet All the Pals</button>
-        </div>
-      </div>
-    </div>
-  `);
-}
-
-function showAllPals() {
-  render(`
-    <div class="screen">
-      <div class="top-row">
-        <div class="tag">🌟 Meet the Pals</div>
-        <button class="ghost-btn" onclick="${lastResultKey ? "showResult()" : "showStart()"}">
-          ${lastResultKey ? "Back to result" : "Back"}
-        </button>
-      </div>
-
-      <div class="all-pals-card">
-        <h2 style="margin-top:0;">All PitStop Pals</h2>
-        <p class="question-sub" style="margin-bottom:18px;">
-          Each Pal represents a different way of caring for your well-being.
-        </p>
-
-        <div class="all-pals-grid">
-          ${Object.keys(pals).map((key) => {
-            const pal = pals[key];
-            return `
-              <div class="pal-mini-card">
-                <img src="${pal.image}" alt="${pal.short}">
-                <div>
-                  <strong>${pal.name}</strong>
-                  <span>${pal.badge}</span>
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      </div>
-    </div>
-  `);
-}
-
-function resetQuiz() {
-  currentQuestion = -1;
-  answerHistory = [];
-  scores = createEmptyScores();
-  lastResultKey = null;
-  showStart();
-}
-
-showStart();
+  showScreen(startScreen);
+});
