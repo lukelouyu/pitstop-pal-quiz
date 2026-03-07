@@ -1,6 +1,6 @@
 
 
-**PitStop Pal Quiz** 
+***PitStop Pal Quiz***
 ## **for NUS PSS Welfare Pack AY25/26 Sem 2**
 
 
