@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultDesc = document.getElementById("result-desc");
   const resultBadge = document.getElementById("result-badge");
   const resultTip = document.getElementById("result-tip");
-  const finalScoreList = document.getElementById("final-score-list");
+  // const finalScoreList = document.getElementById("final-score-list");
   const allPalsGrid = document.getElementById("all-pals-grid");
 
   let currentQuestionIndex = 0;
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return tied[0];
   }
 
-  function renderFinalScores() {
+/*  function renderFinalScores() {
     finalScoreList.innerHTML = "";
 
     const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
       row.innerHTML = `<strong>${pals[key].short}</strong><span>${value}</span>`;
       finalScoreList.appendChild(row);
     });
-  }
+  } */ 
 
   function showResult() {
     const topPal = getTopPal();
@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resultBadge.textContent = result.badge;
     resultTip.textContent = result.tip;
 
-    renderFinalScores();
+    // renderFinalScores();
     showScreen(resultScreen);
   }
 
