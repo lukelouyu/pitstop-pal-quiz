@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderQuestion();
   }
 
-  function renderQuestion() {
+ function renderQuestion() {
   if (typeof questions === "undefined") {
     showDataError("questions is missing. Please check that data.js is uploaded and linked correctly.");
     return;
@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 }
 
+  
   function getTopPal() {
     const maxScore = Math.max(...Object.values(scores));
     const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
