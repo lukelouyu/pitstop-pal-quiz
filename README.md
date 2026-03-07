@@ -1,7 +1,7 @@
 
 
 **PitStop Pal Quiz** 
-##**for NUS PSS Welfare Pack AY25/26 Sem 2**
+## **for NUS PSS Welfare Pack AY25/26 Sem 2**
 
 
 A mobile-friendly web quiz created for **NUS PSS Welfare Pack AY25/26 Sem 2** to help users discover which **PitStop Pal** best matches their natural wellness style.
