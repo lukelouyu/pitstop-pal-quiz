@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resultBadge.textContent = result.badge;
     resultTip.textContent = result.tip;
 
-    // renderFinalScores();
+    renderFinalScores();
     showScreen(resultScreen);
   }
 
