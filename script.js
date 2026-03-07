@@ -144,18 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 }
 
-
-  answerHistory.push(opt.pal);
-  currentQuestionIndex += 1;
-
-  if (currentQuestionIndex < questions.length) {
-    renderQuestion();
-  } else {
-    showResult();
-  }
-});
-  }
-
   function getTopPal() {
     const maxScore = Math.max(...Object.values(scores));
     const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
