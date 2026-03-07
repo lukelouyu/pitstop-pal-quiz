@@ -72,60 +72,123 @@ const pals = {
 };
 
 const questions = [
-  {
+   {
     q: "Q1 – CourseReg Storm",
     sub: "Your timetable explodes into chaos. Everything is messy, there are modules with clashing time slots and full of uncertainty. What do you do first?",
     a: [
-      { text: "Pause. Breathe. Sort modules by priority and what you can realistically manage.", pal: "perry", points: 2 },
-      { text: "Step back and ask which modules truly align with where you want to go in life.", pal: "ping", points: 1 }
+      {
+        text: "Pause. Breathe. Sort modules by priority and what you can realistically manage.",
+        pal: "perry",
+        points: 2,
+        extra: [{ pal: "ping", points: -1 }]
+      },
+      {
+        text: "Step back and ask which modules truly align with where you want to go in life.",
+        pal: "ping",
+        points: 1
+      }
     ]
   },
   {
     q: "Q2 – CCA Festival at Town Green",
     sub: "You step into a vibrant hall filled with music, buzzing booths, and enthusiastic seniors inviting you to join. What naturally draws your attention?",
     a: [
-      { text: "A CCA with strong community, mentorship, and connection.", pal: "iggy", points: 2 },
-      { text: "Something active that keeps you physically energised.", pal: "ola", points: 1 }
+      {
+        text: "A CCA with strong community, mentorship, and connection.",
+        pal: "iggy",
+        points: 2,
+        extra: [{ pal: "ola", points: -1 }]
+      },
+      {
+        text: "Something active that keeps you physically energised.",
+        pal: "ola",
+        points: 1
+      }
     ]
   },
   {
     q: "Q3 – Unexpected Deadline",
     sub: "An assignment deadline catches you off guard. You return to your room, staring at your screen as tension builds.",
     a: [
-      { text: "You deliberately take a short time-out before doing anything.", pal: "tobi", points: 2 },
-      { text: "You realise your sleep has been messy, so you fix that first.", pal: "sky", points: 1 }
+      {
+        text: "You deliberately take a short time-out before doing anything.",
+        pal: "tobi",
+        points: 2,
+        extra: [{ pal: "sky", points: -1 }]
+      },
+      {
+        text: "You realise your sleep has been messy, so you fix that first.",
+        pal: "sky",
+        points: 1
+      }
     ]
   },
   {
     q: "Q4 – Snacker",
     sub: "As you work through your assignment, brain fog sets in. What do you do?",
     a: [
-      { text: "Water. Balanced snack. Stabilise first.", pal: "ty", points: 2 },
-      { text: "Quick brisk walk outside to clear your head.", pal: "ola", points: 1 }
+      {
+        text: "Water. Balanced snack. Stabilise first.",
+        pal: "ty",
+        points: 2,
+        extra: [{ pal: "ola", points: -1 }]
+      },
+      {
+        text: "Quick brisk walk outside to clear your head.",
+        pal: "ola",
+        points: 1
+      }
     ]
   },
   {
     q: "Q5 – Guarding the Night",
     sub: "It’s late. You’re not finished. The temptation of an all-nighter lingers. You decide:",
     a: [
-      { text: "Nothing is worth wrecking your sleep rhythm.", pal: "sky", points: 2 },
-      { text: "You’ll prep nourishing meals to keep energy stable.", pal: "ty", points: 1 }
+      {
+        text: "Nothing is worth wrecking your sleep rhythm.",
+        pal: "sky",
+        points: 2,
+        extra: [{ pal: "ty", points: -1 }]
+      },
+      {
+        text: "You’ll prep nourishing meals to keep energy stable.",
+        pal: "ty",
+        points: 1
+      }
     ]
   },
   {
     q: "Q6 – Feelings of Jitters",
     sub: "After a few days, you receive an email. Your result has been released. Your heart races. How do you steady yourself?",
     a: [
-      { text: "You move, stretch, walk, and release tension physically.", pal: "ola", points: 2 },
-      { text: "You take five slow breaths and tell yourself that you can do it.", pal: "perry", points: 1 }
+      {
+        text: "You move, stretch, walk, and release tension physically.",
+        pal: "ola",
+        points: 2,
+        extra: [{ pal: "perry", points: -1 }]
+      },
+      {
+        text: "You take five slow breaths and tell yourself that you can do it.",
+        pal: "perry",
+        points: 1
+      }
     ]
   },
   {
     q: "Q7 – After Receiving the Results",
     sub: "The results you received were not up to your expectations. Now what?",
     a: [
-      { text: "You reflect on why this journey matters beyond one paper.", pal: "ping", points: 2 },
-      { text: "You call or text someone who understands.", pal: "iggy", points: 1 }
+      {
+        text: "You reflect on why this journey matters beyond one paper.",
+        pal: "ping",
+        points: 2,
+        extra: [{ pal: "iggy", points: -1 }]
+      },
+      {
+        text: "You call or text someone who understands.",
+        pal: "iggy",
+        points: 1
+      }
     ]
   },
   {
