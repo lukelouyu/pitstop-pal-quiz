@@ -1,7 +1,6 @@
-# pitstop-pal-quiz
-NUS PSS PitStop Pal Personality Test
 
-# PitStop Pal Quiz
+
+# PitStop Pal Quiz for NUS PSS Welfare Pack AY25/26 Sem 2
 
 A mobile-friendly web quiz created for **NUS PSS** to help users discover which **PitStop Pal** best matches their natural wellness style.
 
