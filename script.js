@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <p class="option-desc">${opt.text}</p>
     `;
 
-    button.addEventListener("click", () => {
+      button.addEventListener("click", () => {
       scores[opt.pal] += opt.points;
 
       if (Array.isArray(opt.extra)) {
@@ -142,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     optionsContainer.appendChild(button);
   });
-}
 
   
   function getTopPal() {
