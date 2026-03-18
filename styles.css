@@ -1,21 +1,3 @@
---font-heading: "Poppins", sans-serif;
---font-body: "Nunito", sans-serif;
-
-@font-face {
-  font-family: "Roca Two";
-  src: url("fonts/RocaTwo-Regular.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Bouba Round";
-  src: url("fonts/BoubaRound-Regular.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Dry Whiteboard Marker";
-  src: url("fonts/DryWhiteboardMarker-Regular.woff2") format("woff2");
-}
-
 * {
   box-sizing: border-box;
 }
@@ -31,9 +13,8 @@
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
   --radius-xl: 30px;
 
-  --font-heading: "Roca Two", Georgia, "Times New Roman", serif;
-  --font-body: "Bouba Round", "Trebuchet MS", "Arial Rounded MT Bold", Arial, sans-serif;
-  --font-marker: "Dry Whiteboard Marker", "Comic Sans MS", cursive;
+  --font-heading: "Poppins", sans-serif;
+  --font-body: "Nunito", sans-serif;
 }
 
 body {
@@ -50,8 +31,8 @@ body {
 .all-pals-card h2,
 .poster-fallback h2 {
   font-family: var(--font-heading);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--dark-blue);
 }
 
@@ -71,13 +52,6 @@ body {
   font-family: var(--font-body);
 }
 
-.tag,
-.chip,
-.pill {
-  font-family: var(--font-marker);
-  letter-spacing: 0.02em;
-}
-
 .page {
   min-height: 100vh;
   display: flex;
@@ -88,7 +62,7 @@ body {
 
 .shell {
   width: 100%;
-  max-width: 860px;
+  max-width: 1280px;
   min-height: 700px;
   background: rgba(255, 250, 241, 0.96);
   border-radius: 34px;
@@ -171,7 +145,7 @@ body {
   padding: 10px 14px;
   border-radius: 999px;
   font-size: 0.92rem;
-  font-weight: bold;
+  font-weight: 700;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
 }
 
@@ -182,7 +156,7 @@ body {
   padding: 10px 14px;
   border-radius: 999px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
 }
 
@@ -233,8 +207,8 @@ body {
 .intro-copy p {
   margin: 0 auto;
   max-width: 620px;
-  line-height: 1.55;
-  font-size: 1rem;
+  line-height: 1.6;
+  font-size: 1.08rem;
 }
 
 .start-btn-wrap {
@@ -249,7 +223,6 @@ body {
   border-radius: 999px;
   background: #f47821;
   color: #ffffff;
-  font-family: inherit;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
@@ -269,6 +242,7 @@ body {
   padding: 10px 14px;
   border-radius: 999px;
   font-size: 0.92rem;
+  font-weight: 600;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
@@ -310,7 +284,7 @@ body {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 10px;
   font-size: 0.96rem;
 }
@@ -348,7 +322,8 @@ body {
 .question-sub {
   margin: 0 0 20px;
   color: #4a6480;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 1.05rem;
 }
 
 .options {
@@ -360,14 +335,14 @@ body {
 .option-btn {
   width: 100%;
   border: none;
-  border-radius: 22px;
+  border-radius: 24px;
   background: #fff9f2;
-  padding: 18px;
+  padding: 22px;
   text-align: left;
   cursor: pointer;
   transition: 0.22s ease;
   border: 2px solid transparent;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.035);
 }
 
 .option-btn:hover {
@@ -400,7 +375,7 @@ body {
 }
 
 .option-title {
-  font-weight: bold;
+  font-weight: 700;
   color: var(--dark-blue);
   font-size: 1rem;
 }
@@ -413,9 +388,9 @@ body {
 
 .option-desc {
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.55;
   color: #264867;
-  font-size: 0.96rem;
+  font-size: 1.02rem;
 }
 
 .result-main {
@@ -448,6 +423,7 @@ body {
 .result-main p {
   margin: 0;
   line-height: 1.6;
+  font-size: 1.04rem;
 }
 
 .pill {
@@ -458,7 +434,7 @@ body {
   padding: 10px 14px;
   border-radius: 999px;
   font-size: 0.92rem;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .tip-box {
@@ -498,7 +474,7 @@ body {
 }
 
 .score-row span {
-  font-weight: bold;
+  font-weight: 700;
   color: var(--blue);
 }
 
@@ -516,7 +492,7 @@ body {
   padding: 14px 18px;
   font-size: 1rem;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .primary-btn {
@@ -556,6 +532,8 @@ body {
   display: block;
   margin-bottom: 4px;
   color: var(--dark-blue);
+  font-family: var(--font-heading);
+  font-weight: 700;
 }
 
 .pal-mini-card span {
