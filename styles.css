@@ -1,3 +1,21 @@
+--font-heading: "Poppins", sans-serif;
+--font-body: "Nunito", sans-serif;
+
+@font-face {
+  font-family: "Roca Two";
+  src: url("fonts/RocaTwo-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bouba Round";
+  src: url("fonts/BoubaRound-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Dry Whiteboard Marker";
+  src: url("fonts/DryWhiteboardMarker-Regular.woff2") format("woff2");
+}
+
 * {
   box-sizing: border-box;
 }
@@ -5,20 +23,59 @@
 :root {
   --blue: #1e6aa8;
   --dark-blue: #003664;
-  --yellow: #f2bb18;
-  --cream: #fffaf1;
+  --yellow: #f4b515;
+  --cream: #fff9f2;
   --orange: #f47821;
   --green: #31af73;
+  --pink: #f5c8c8;
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
   --radius-xl: 30px;
+
+  --font-heading: "Roca Two", Georgia, "Times New Roman", serif;
+  --font-body: "Bouba Round", "Trebuchet MS", "Arial Rounded MT Bold", Arial, sans-serif;
+  --font-marker: "Dry Whiteboard Marker", "Comic Sans MS", cursive;
 }
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top left, #ffe599 0%, #f2bb18 38%, #e9ad00 100%);
+  font-family: var(--font-body);
+  background: radial-gradient(circle at top left, #ffe599 0%, #f4b515 38%, #e9ad00 100%);
   color: var(--dark-blue);
   min-height: 100vh;
+}
+
+.intro-copy h1,
+.question-card h2,
+.result-main h1,
+.all-pals-card h2,
+.poster-fallback h2 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--dark-blue);
+}
+
+.intro-copy p,
+.question-sub,
+.option-desc,
+.result-main p,
+.pal-mini-card span,
+.tag,
+.ghost-btn,
+.start-btn-below,
+.primary-btn,
+.secondary-btn,
+.chip,
+.pill,
+.progress-label {
+  font-family: var(--font-body);
+}
+
+.tag,
+.chip,
+.pill {
+  font-family: var(--font-marker);
+  letter-spacing: 0.02em;
 }
 
 .page {
@@ -168,9 +225,9 @@ body {
 }
 
 .intro-copy h1 {
-  margin: 0 0 10px;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.05;
+  margin: 0 0 12px;
+  font-size: clamp(2.8rem, 5vw, 4.6rem);
+  line-height: 1.02;
 }
 
 .intro-copy p {
@@ -276,16 +333,16 @@ body {
 .question-card,
 .result-card,
 .all-pals-card {
-  background: #fff;
+  background: #f8f8f8;
   border-radius: var(--radius-xl);
   padding: 24px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
 }
 
 .question-card h2 {
-  margin: 0 0 8px;
-  font-size: clamp(1.45rem, 2.5vw, 2rem);
-  line-height: 1.2;
+  margin: 0 0 10px;
+  font-size: clamp(2.1rem, 4vw, 3.2rem);
+  line-height: 1.08;
 }
 
 .question-sub {
@@ -304,13 +361,13 @@ body {
   width: 100%;
   border: none;
   border-radius: 22px;
-  background: #fffaf3;
+  background: #fff9f2;
   padding: 18px;
   text-align: left;
   cursor: pointer;
   transition: 0.22s ease;
   border: 2px solid transparent;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
 }
 
 .option-btn:hover {
@@ -384,8 +441,8 @@ body {
 
 .result-main h1 {
   margin: 0 0 10px;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  line-height: 1.1;
+  font-size: clamp(2.3rem, 4vw, 3.8rem);
+  line-height: 1.06;
 }
 
 .result-main p {
