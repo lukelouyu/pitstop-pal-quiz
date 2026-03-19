@@ -1,16 +1,17 @@
 const express = require("express");
 const path = require("path");
+const quizRoutes = require("./routes/quizRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Serve frontend files from project root
-const frontendPath = path.join(__dirname, "..");
+app.use("/api/quiz", quizRoutes);
+
+const frontendPath = path.join(__dirname, "..", "public");
 app.use(express.static(frontendPath));
 
-// Homepage
 app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
