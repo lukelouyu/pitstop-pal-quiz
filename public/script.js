@@ -30,13 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentQuestionIndex = 0;
   let lastResultKey = null;
-  let scores = createEmptyScores();
-  let answerHistory = [];
   let userAnswers = [];
   let isSubmittingResult = false;
-
   let currentQuestions = [];
-  let rankedPals = [];
 
   const currentScript = document.querySelector('script[src$="script.js"]');
   const assetBase = currentScript
@@ -47,119 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return new URL(fileName, assetBase).href;
   }
 
-  function createEmptyScores() {
-    return Object.fromEntries(PAL_KEYS.map((key) => [key, 0]));
-  }
-
-  function getRankedPals() {
-    return [...PAL_KEYS].sort((a, b) => {
-      const byScore = scores[b] - scores[a];
-      if (byScore !== 0) return byScore;
-
-      const lastA = answerHistory.lastIndexOf(a);
-      const lastB = answerHistory.lastIndexOf(b);
-      return lastB - lastA;
-    });
-  }
-
-  // EDIT: only keep pals that actually have text for this adaptive question
-  function getAdaptiveCandidatesForQuestion(questionId) {
-    return getRankedPals().filter((palKey) => {
-      return Boolean(adaptiveOptionBank?.[palKey]?.[questionId]);
-    });
-  }
-
-  // EDIT: fallback pool from all pals if top-ranked pals do not have text for this question
-  function getFallbackCandidatesForQuestion(questionId, exclude = []) {
-    return PAL_KEYS.filter((palKey) => {
-      return (
-        !exclude.includes(palKey) &&
-        Boolean(adaptiveOptionBank?.[palKey]?.[questionId])
-      );
-    });
-  }
-
-  // EDIT: build adaptive questions using ranking first, then fallback candidates.
-  // This ensures all 6 questions can still be shown even if q4/q5 only exist for some pals.
-  function buildAdaptiveQuestions() {
-    const ranking = getRankedPals();
-    rankedPals = ranking;
-
-    return adaptiveTemplates.map((template) => {
-      const rankedCandidates = getAdaptiveCandidatesForQuestion(template.id);
-      const optionCount = 2; // EDIT: keep q4-q6 as 2-option adaptive questions
-
-      let selectedPals = rankedCandidates.slice(0, optionCount);
-
-      // EDIT: if not enough ranked candidates, top up from all valid pals
-      if (selectedPals.length < optionCount) {
-        const fallback = getFallbackCandidatesForQuestion(template.id, selectedPals);
-        selectedPals = [...selectedPals, ...fallback.slice(0, optionCount - selectedPals.length)];
-      }
-
-      return {
-        id: template.id,
-        q: template.q,
-        sub: template.sub,
-        a: selectedPals.map((palKey) => ({
-          text: adaptiveOptionBank[palKey][template.id],
-          pal: palKey,
-          points: 1
-        }))
-      };
-    });
-  }
-
-  function cloneAnswer(opt) {
-    return {
-      pal: opt.pal,
-      points: opt.points || 0,
-      extra: Array.isArray(opt.extra)
-        ? opt.extra.map((change) => ({
-            pal: change.pal,
-            points: change.points || 0
-          }))
-        : []
-    };
-  }
-
-  function recalculateStateFromAnswers() {
-    scores = createEmptyScores();
-    answerHistory = [];
-
-    userAnswers.forEach((answer) => {
-      if (!answer) return;
-
-      if (scores[answer.pal] !== undefined) {
-        scores[answer.pal] += answer.points || 0;
-      }
-
-      if (Array.isArray(answer.extra)) {
-        answer.extra.forEach((change) => {
-          if (scores[change.pal] !== undefined) {
-            scores[change.pal] += change.points || 0;
-          }
-        });
-      }
-
-      answerHistory.push(answer.pal);
-    });
-  }
-
-  function hasCompletedFixedQuestions() {
-    return fixedQuestions.every((_, index) => Boolean(userAnswers[index]));
-  }
-
-  function updateQuestionSet() {
-    if (hasCompletedFixedQuestions()) {
-      currentQuestions = [...fixedQuestions, ...buildAdaptiveQuestions()];
-    } else {
-      currentQuestions = [...fixedQuestions];
-    }
-  }
-
   function getTotalQuestionCount() {
-    // EDIT: always show full 6-question progress
     return fixedQuestions.length + adaptiveTemplates.length;
   }
 
@@ -188,23 +72,157 @@ document.addEventListener("DOMContentLoaded", () => {
     if (backPrevBtn) backPrevBtn.classList.add("hidden");
   }
 
-  function startQuiz() {
-    currentQuestionIndex = 0;
-    lastResultKey = null;
-    scores = createEmptyScores();
-    answerHistory = [];
-    userAnswers = [];
-    rankedPals = [];
-    updateQuestionSet();
-    showScreen(quizScreen);
-    renderQuestion();
+  function cloneAnswer(opt) {
+    return {
+      pal: opt.pal,
+      text: opt.text || ""
+    };
+  }
+
+  function uniqueTruthy(items) {
+    return [...new Set((items || []).filter(Boolean))];
+  }
+
+  function hasCompletedFixedQuestions() {
+    return fixedQuestions.every((_, index) => Boolean(userAnswers[index]?.pal));
+  }
+
+  function getSeedWinners() {
+    return userAnswers
+      .slice(0, fixedQuestions.length)
+      .map((answer) => answer?.pal)
+      .filter(Boolean);
+  }
+
+  function getAdaptiveText(palKey, questionId) {
+    return adaptiveOptionBank?.[palKey]?.[questionId] || null;
+  }
+
+  function getValidCandidates(questionId, candidates) {
+    return uniqueTruthy(candidates).filter((palKey) => {
+      return Boolean(getAdaptiveText(palKey, questionId));
+    });
+  }
+
+  function chooseTwoCandidates(questionId, primary = [], secondary = []) {
+    let selected = getValidCandidates(questionId, primary).slice(0, 2);
+
+    if (selected.length < 2) {
+      const backup = getValidCandidates(questionId, secondary).filter((palKey) => {
+        return !selected.includes(palKey);
+      });
+      selected = [...selected, ...backup.slice(0, 2 - selected.length)];
+    }
+
+    if (selected.length < 2) {
+      const emergency = getValidCandidates(questionId, PAL_KEYS).filter((palKey) => {
+        return !selected.includes(palKey);
+      });
+      selected = [...selected, ...emergency.slice(0, 2 - selected.length)];
+    }
+
+    return selected.slice(0, 2);
+  }
+
+  function makeHeadToHeadQuestion(template, palA, palB) {
+    if (!template || !palA || !palB) {
+      return null;
+    }
+
+    const textA = getAdaptiveText(palA, template.id);
+    const textB = getAdaptiveText(palB, template.id);
+
+    if (!textA || !textB) {
+      return null;
+    }
+
+    return {
+      id: template.id,
+      q: template.q,
+      sub: template.sub,
+      a: [
+        {
+          text: textA,
+          pal: palA
+        },
+        {
+          text: textB,
+          pal: palB
+        }
+      ]
+    };
+  }
+
+  function getOtherPal(pair, chosenPal) {
+    return (pair || []).find((palKey) => palKey && palKey !== chosenPal) || null;
+  }
+
+  function buildAdaptiveQuestions() {
+    if (!Array.isArray(adaptiveTemplates) || adaptiveTemplates.length < 3) {
+      return [];
+    }
+
+    const seeds = getSeedWinners();
+
+    if (seeds.length < fixedQuestions.length) {
+      return [];
+    }
+
+    const [seed1, seed2, seed3] = seeds;
+
+    const q4Pair = chooseTwoCandidates(
+      adaptiveTemplates[0].id,
+      [seed1, seed2],
+      [seed3]
+    );
+    const q4Winner = userAnswers[3]?.pal || q4Pair[0] || null;
+    const q4Loser = getOtherPal(q4Pair, q4Winner);
+
+    const q5Pair = chooseTwoCandidates(
+      adaptiveTemplates[1].id,
+      [q4Winner, seed3],
+      [q4Loser, seed1, seed2]
+    );
+    const q5Winner = userAnswers[4]?.pal || q5Pair[0] || null;
+    const q5Loser = getOtherPal(q5Pair, q5Winner);
+
+    const q6Pair = chooseTwoCandidates(
+      adaptiveTemplates[2].id,
+      [q5Winner, q5Loser],
+      [q4Winner, q4Loser, seed1, seed2, seed3]
+    );
+
+    const q4 = makeHeadToHeadQuestion(adaptiveTemplates[0], q4Pair[0], q4Pair[1]);
+    const q5 = makeHeadToHeadQuestion(adaptiveTemplates[1], q5Pair[0], q5Pair[1]);
+    const q6 = makeHeadToHeadQuestion(adaptiveTemplates[2], q6Pair[0], q6Pair[1]);
+
+    return [q4, q5, q6].filter(Boolean);
+  }
+
+  function updateQuestionSet() {
+    if (hasCompletedFixedQuestions()) {
+      currentQuestions = [...fixedQuestions, ...buildAdaptiveQuestions()];
+    } else {
+      currentQuestions = [...fixedQuestions];
+    }
   }
 
   function getVisibleOptions(item) {
     if (!item || !Array.isArray(item.a)) {
       return [];
     }
-    return [...item.a];
+
+    return item.a.slice(0, 2);
+  }
+
+  function startQuiz() {
+    currentQuestionIndex = 0;
+    lastResultKey = null;
+    userAnswers = [];
+    currentQuestions = [...fixedQuestions];
+    updateQuestionSet();
+    showScreen(quizScreen);
+    renderQuestion();
   }
 
   function renderQuestion() {
@@ -235,8 +253,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const visibleOptions = getVisibleOptions(item);
 
-    if (!Array.isArray(visibleOptions) || visibleOptions.length === 0) {
-      showDataError(`No valid options found for ${item.id || "this question"}.`);
+    if (!Array.isArray(visibleOptions) || visibleOptions.length !== 2) {
+      showDataError(`Expected exactly 2 valid options for ${item.id || "this question"}.`);
       return;
     }
 
@@ -278,19 +296,12 @@ document.addEventListener("DOMContentLoaded", () => {
       button.className = "option-btn";
       button.style.setProperty("--accent", pal.color || "#999");
       button.style.setProperty("--accent-soft", pal.soft || "#eee");
-
       button.innerHTML = `
         <p class="option-desc">${opt.text}</p>
       `;
 
       button.addEventListener("click", async () => {
-        // EDIT: store the answer so all 6 questions determine the final winner
         userAnswers[currentQuestionIndex] = cloneAnswer(opt);
-
-        // EDIT: recompute full state from saved answers
-        recalculateStateFromAnswers();
-
-        // EDIT: after fixed questions are done, rebuild adaptive path
         updateQuestionSet();
 
         currentQuestionIndex += 1;
@@ -304,6 +315,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       optionsContainer.appendChild(button);
     });
+  }
+
+  function getFrontendWinner() {
+    for (let i = userAnswers.length - 1; i >= 0; i -= 1) {
+      if (userAnswers[i]?.pal) {
+        return userAnswers[i].pal;
+      }
+    }
+    return null;
   }
 
   function renderAssignedPal(palKey) {
@@ -349,10 +369,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isSubmittingResult) return;
     isSubmittingResult = true;
 
-    recalculateStateFromAnswers();
+    const preferredPal = getFrontendWinner();
 
-    const ranked = getRankedPals();
-    const preferredPal = ranked[0];
+    if (!preferredPal) {
+      showDataError("Could not determine final winner.");
+      isSubmittingResult = false;
+      return;
+    }
 
     try {
       const response = await fetch("/api/quiz/assign", {
@@ -362,10 +385,9 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         body: JSON.stringify({
           preferredPal,
-          rankedPals: ranked,
-          scores,
-          answerHistory,
-          quizVersion: "adaptive-6"
+          seedWinners: getSeedWinners(),
+          answerHistory: userAnswers.map((answer) => answer?.pal).filter(Boolean),
+          quizVersion: "elimination-6"
         })
       });
 
@@ -407,11 +429,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetToStart() {
     currentQuestionIndex = 0;
     lastResultKey = null;
-    scores = createEmptyScores();
-    answerHistory = [];
     userAnswers = [];
     currentQuestions = [...fixedQuestions];
-    rankedPals = [];
     showScreen(startScreen);
   }
 
@@ -452,11 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
     backPrevBtn.addEventListener("click", () => {
       if (currentQuestionIndex > 0) {
         currentQuestionIndex -= 1;
-
-        // EDIT: remove answers from this point onward when going back
         userAnswers = userAnswers.slice(0, currentQuestionIndex);
-
-        recalculateStateFromAnswers();
         updateQuestionSet();
         renderQuestion();
       }
