@@ -61,77 +61,73 @@
 
         <!-- QUIZ SCREEN -->
         <section id="quiz-screen" class="screen hidden">
+          <div class="quiz-nav">
+            <button id="back-start-btn" class="quiz-back-btn">Back to start</button>
+            <button id="back-prev-btn" class="quiz-back-btn hidden">Back to previous question</button>
+          </div>
 
-          <section id="quiz-screen" class="screen hidden">
-
-            <div class="quiz-nav">
-              <button id="back-start-btn" class="quiz-back-btn">Back to start</button>
-              <button id="back-prev-btn" class="quiz-back-btn hidden">Back to previous question</button>
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span id="progress-text">Question 1 of 14</span>
+              <span id="progress-percent">7%</span>
             </div>
-
-            <div class="progress-wrap">
-              <div class="progress-label">
-                <span id="progress-text">Question 1 of 14</span>
-                <span id="progress-percent">7%</span>
-              </div>
-              <div class="progress-bar">
-                <div id="progress-fill" class="progress-fill"></div>
-              </div>
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill"></div>
             </div>
+          </div>
 
-            <div class="question-card">
-              <h2 id="question-title">Question title</h2>
-              <p id="question-sub" class="question-sub">Question text</p>
-              <div id="options-container" class="options"></div>
-            </div>
-          </section>
+          <div class="question-card">
+            <h2 id="question-title">Question title</h2>
+            <p id="question-sub" class="question-sub">Question text</p>
+            <div id="options-container" class="options"></div>
+          </div>
+        </section>
 
-          <!-- RESULT SCREEN -->
-          <section id="result-screen" class="screen hidden">
-            <div class="top-row">
-              <button id="result-home-btn" class="ghost-btn">Home</button>
-            </div>
+        <!-- RESULT SCREEN -->
+        <section id="result-screen" class="screen hidden">
+          <div class="top-row">
+            <button id="result-home-btn" class="ghost-btn">Home</button>
+          </div>
 
-            <div class="result-card">
-              <div class="result-main">
-                <div class="result-figure">
-                  <img id="result-image" src="" alt="PitStop Pal result" />
-                </div>
-
-                <div>
-                  <h1 id="result-name">Perry — Personal Skills</h1>
-                  <p id="result-desc">Result description</p>
-                  <div id="result-badge" class="pill">Badge</div>
-                </div>
+          <div class="result-card">
+            <div class="result-main">
+              <div class="result-figure">
+                <img id="result-image" src="" alt="PitStop Pal result" />
               </div>
 
-              <div class="tip-box">
-                <strong>Try this today:</strong>
-                <span id="result-tip"></span>
-              </div>
-
-              <div class="result-actions">
-                <button id="retry-btn" class="secondary-btn">Try Again</button>
-                <button id="meet-pals-btn" class="primary-btn">Meet All the Pals</button>
+              <div>
+                <h1 id="result-name">Perry — Personal Skills</h1>
+                <p id="result-desc">Result description</p>
+                <div id="result-badge" class="pill">Badge</div>
               </div>
             </div>
-          </section>
 
-          <!-- ALL PALS SCREEN -->
-          <section id="all-pals-screen" class="screen hidden">
-            <div class="top-row">
-              <button id="back-result-btn" class="ghost-btn">Back</button>
+            <div class="tip-box">
+              <strong>Try this today:</strong>
+              <span id="result-tip"></span>
             </div>
 
-            <div class="all-pals-card">
-              <h2>All PitStop Pals</h2>
-              <p class="question-sub">
-                Each Pal represents a different way of caring for your well-being.
-              </p>
-              <div id="all-pals-grid" class="all-pals-grid"></div>
+            <div class="result-actions">
+              <button id="retry-btn" class="secondary-btn">Try Again</button>
+              <button id="meet-pals-btn" class="primary-btn">Meet All the Pals</button>
             </div>
-          </section>
+          </div>
+        </section>
 
+        <!-- ALL PALS SCREEN -->
+        <section id="all-pals-screen" class="screen hidden">
+          <div class="top-row">
+            <button id="back-result-btn" class="ghost-btn">Back</button>
+          </div>
+
+          <div class="all-pals-card">
+            <h2>All PitStop Pals</h2>
+            <p class="question-sub">
+              Each Pal represents a different way of caring for your well-being.
+            </p>
+            <div id="all-pals-grid" class="all-pals-grid"></div>
+          </div>
+        </section>
       </main>
     </div>
   </div>
