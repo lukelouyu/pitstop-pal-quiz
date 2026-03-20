@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-  
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Which PitStop Pal Are You?</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Nunito:wght@400;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -22,11 +23,8 @@
           </div>
 
           <div class="hero-card">
-            <img
-              src="Event Tele Post.png"
-              alt="PitStop Pal poster"
-              onerror="this.style.display='none'; document.getElementById('poster-fallback').style.display='flex';"
-            />
+            <img src="Event Tele Post.png" alt="PitStop Pal poster"
+              onerror="this.style.display='none'; document.getElementById('poster-fallback').style.display='flex';" />
             <div id="poster-fallback" class="poster-fallback" style="display:none;">
               <div>
                 <h2>Campus Cruise</h2>
@@ -63,8 +61,15 @@
 
         <!-- QUIZ SCREEN -->
         <section id="quiz-screen" class="screen hidden">
-          <div class="top-row">
+          
+          <div class="top-row quiz-top-row">
             <button id="back-home-btn" class="ghost-btn">Back to start</button>
+            <button id="back-prev-btn" class="ghost-btn hidden">Back to previous question</button>
+          </div>
+
+          <div class="quiz-nav">
+            <button id="back-start-btn" class="nav-btn">Back to start</button>
+            <button id="back-prev-btn" class="nav-btn hidden">Back to previous question</button>
           </div>
 
           <div class="progress-wrap">
@@ -137,4 +142,5 @@
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>

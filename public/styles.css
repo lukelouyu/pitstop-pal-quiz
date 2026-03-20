@@ -558,3 +558,30 @@ body {
     margin: 0 auto;
   }
 }
+
+.quiz-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.nav-btn {
+  background: #f7f7f7;
+  color: #0b4a7d;
+  border: none;
+  border-radius: 999px;
+  padding: 16px 28px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.nav-btn:hover {
+  transform: translateY(-1px);
+}
+
+.hidden {
+  display: none;
+}

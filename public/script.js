@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const startBtn = document.getElementById("start-btn");
   const backHomeBtn = document.getElementById("back-home-btn");
+  const backPrevBtn = document.getElementById("back-prev-btn");
   const resultHomeBtn = document.getElementById("result-home-btn");
   const retryBtn = document.getElementById("retry-btn");
   const meetPalsBtn = document.getElementById("meet-pals-btn");
@@ -27,10 +28,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const allPalsGrid = document.getElementById("all-pals-grid");
 
+  const backStartBtn = document.getElementById("back-start-btn");
+
+
   let currentQuestionIndex = 0;
   let lastResultKey = null;
   let scores = createEmptyScores();
   let answerHistory = [];
+  let userAnswers = [];
   let isSubmittingResult = false;
 
   let currentQuestions = [];
@@ -70,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const ranking = getRankedPals();
     rankedPals = ranking;
 
-    // top 4 gives enough variety without making the UI messy
     const candidates = ranking.slice(0, 4);
 
     return adaptiveTemplates.map((template, index) => {
@@ -87,6 +91,54 @@ document.addEventListener("DOMContentLoaded", () => {
         }))
       };
     });
+  }
+
+  function cloneAnswer(opt) {
+    return {
+      pal: opt.pal,
+      points: opt.points || 0,
+      extra: Array.isArray(opt.extra)
+        ? opt.extra.map((change) => ({
+          pal: change.pal,
+          points: change.points || 0
+        }))
+        : []
+    };
+  }
+
+  function recalculateStateFromAnswers() {
+    scores = createEmptyScores();
+    answerHistory = [];
+
+    userAnswers.forEach((answer) => {
+      if (!answer) return;
+
+      if (scores[answer.pal] !== undefined) {
+        scores[answer.pal] += answer.points || 0;
+      }
+
+      if (Array.isArray(answer.extra)) {
+        answer.extra.forEach((change) => {
+          if (scores[change.pal] !== undefined) {
+            scores[change.pal] += change.points || 0;
+          }
+        });
+      }
+
+      answerHistory.push(answer.pal);
+    });
+  }
+
+  function hasCompletedFixedQuestions() {
+    return fixedQuestions.every((_, index) => Boolean(userAnswers[index]));
+  }
+
+  function updateQuestionSet() {
+    if (hasCompletedFixedQuestions()) {
+      currentQuestions = [...fixedQuestions, ...buildAdaptiveQuestions()];
+    } else {
+      currentQuestions = [...fixedQuestions];
+    }
   }
 
   function showScreen(screen) {
@@ -110,6 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (progressText) progressText.textContent = "Question 0 of 0";
     if (progressPercent) progressPercent.textContent = "0%";
     if (progressFill) progressFill.style.width = "0%";
+
+    if (backPrevBtn) backPrevBtn.classList.add("hidden");
   }
 
   function startQuiz() {
@@ -117,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lastResultKey = null;
     scores = createEmptyScores();
     answerHistory = [];
+    userAnswers = [];
     rankedPals = [];
     currentQuestions = [...fixedQuestions];
     showScreen(quizScreen);
@@ -134,11 +189,23 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (
+      currentQuestionIndex === fixedQuestions.length &&
+      currentQuestions.length === fixedQuestions.length &&
+      hasCompletedFixedQuestions()
+    ) {
+      updateQuestionSet();
+    }
+
     const item = currentQuestions[currentQuestionIndex];
 
     if (!item) {
       showDataError("Question data is invalid or missing.");
       return;
+    }
+
+    if (backPrevBtn) {
+      backPrevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
     }
 
     const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
@@ -168,7 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     item.a.forEach((opt) => {
       const pal = pals[opt.pal];
-
       if (!pal) return;
 
       const button = document.createElement("button");
@@ -177,37 +243,23 @@ document.addEventListener("DOMContentLoaded", () => {
       button.style.setProperty("--accent-soft", pal.soft || "#eee");
 
       button.innerHTML = `
-        <p class="option-desc">${opt.text}</p>
-      `;
+      <p class="option-desc">${opt.text}</p>
+    `;
 
       button.addEventListener("click", async () => {
         console.log("Option clicked:", opt.text, "| pal =", opt.pal, "| qIndex =", currentQuestionIndex);
 
-        if (scores[opt.pal] !== undefined) {
-          scores[opt.pal] += opt.points || 0;
-        }
+        userAnswers[currentQuestionIndex] = cloneAnswer(opt);
+        userAnswers = userAnswers.slice(0, currentQuestionIndex + 1);
 
-        if (Array.isArray(opt.extra)) {
-          opt.extra.forEach((change) => {
-            if (scores[change.pal] !== undefined) {
-              scores[change.pal] += change.points || 0;
-            }
-          });
-        }
+        recalculateStateFromAnswers();
+        updateQuestionSet();
 
-        answerHistory.push(opt.pal);
         currentQuestionIndex += 1;
 
-        // After fixed Q1-Q3, generate adaptive Q4-Q6 once
-        if (
-          currentQuestionIndex === fixedQuestions.length &&
-          currentQuestions.length === fixedQuestions.length
-        ) {
-          currentQuestions = [...fixedQuestions, ...buildAdaptiveQuestions()];
-          console.log("[FRONTEND] adaptive questions injected =", currentQuestions);
-        }
-
         console.log("After click, currentQuestionIndex =", currentQuestionIndex, "currentQuestions.length =", currentQuestions.length);
+        console.log("[FRONTEND] scores =", JSON.stringify(scores));
+        console.log("[FRONTEND] answerHistory =", JSON.stringify(answerHistory));
 
         if (currentQuestionIndex < currentQuestions.length) {
           renderQuestion();
@@ -215,7 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("Reached final question. Calling showResult()...");
           await showResult();
         }
-
       });
 
       optionsContainer.appendChild(button);
@@ -271,6 +322,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function showResult() {
     if (isSubmittingResult) return;
     isSubmittingResult = true;
+
+    recalculateStateFromAnswers();
 
     const preferredPal = getRankedPals()[0];
     const ranked = getRankedPals();
@@ -328,7 +381,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-
   function renderAllPals() {
     if (!allPalsGrid || typeof pals === "undefined") return;
 
@@ -355,6 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lastResultKey = null;
     scores = createEmptyScores();
     answerHistory = [];
+    userAnswers = [];
     currentQuestions = [];
     rankedPals = [];
     showScreen(startScreen);
@@ -362,6 +415,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (startBtn) {
     startBtn.addEventListener("click", startQuiz);
+  }
+
+  if (backStartBtn) {
+    backStartBtn.addEventListener("click", resetToStart);
   }
 
   if (backHomeBtn) {
@@ -392,6 +449,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  if (backPrevBtn) {
+  backPrevBtn.addEventListener("click", () => {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex -= 1;
+      renderQuestion();
+    }
+  });
+}
 
   showScreen(startScreen);
 });
