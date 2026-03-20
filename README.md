@@ -120,12 +120,13 @@ Without the admin page, the quiz could continue showing a pal whose welfare pack
 Open the admin page in the browser.
 In most deployments, it will be:
 
-- `your-quiz-link/admin/`
-- or `your-quiz-link/admin/index.html`
+- `https://pitstop-pal-quiz.lukelousg.workers.dev/admin/`
+- or `https://pitstop-pal-quiz.lukelousg.workers.dev/admin/index.html`
 
 ### What you need
 You need the **admin key**.
 This is a secret used to protect stock controls from the public.
+Admin Key: nuspss121111
 
 ### Basic admin steps
 1. Open the admin page.
