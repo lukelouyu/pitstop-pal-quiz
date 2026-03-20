@@ -75,21 +75,19 @@ function chooseAssignedPal(state, preferredPal) {
     const available = PAL_KEYS.filter((key) => state.stock[key] > 0);
 
     if (available.length === 0) {
+        console.log("[ALLOCATOR] no stock available");
         return null;
     }
 
     const recentHistory = Array.isArray(state.recentHistory) ? state.recentHistory : [];
     const cooldowns = normalizeMap(state.cooldowns);
 
-    // remove banned pals from candidate pool
     let eligible = available.filter((key) => cooldowns[key] === 0);
 
-    // fallback: if everything is banned but stock still exists, ignore cooldowns
     if (eligible.length === 0) {
         eligible = available;
     }
 
-    // sort by fairness first, then recent usage, then higher stock
     const sorted = [...eligible].sort((a, b) => {
         const byDistributed = state.distributed[a] - state.distributed[b];
         if (byDistributed !== 0) return byDistributed;
@@ -106,7 +104,6 @@ function chooseAssignedPal(state, preferredPal) {
     const k = Math.max(1, Math.min(Number(state.randomK || 1), sorted.length));
     let pool = sorted.slice(0, k);
 
-    // optional: avoid immediate repeat if possible
     const lastAssigned = recentHistory[recentHistory.length - 1];
     if (pool.length > 1 && lastAssigned) {
         const withoutImmediateRepeat = pool.filter((key) => key !== lastAssigned);
@@ -115,12 +112,24 @@ function chooseAssignedPal(state, preferredPal) {
         }
     }
 
-    // if preferred pal survives fairness + cooldown filtering, give it
+    console.log("[ALLOCATOR] preferredPal =", preferredPal);
+    console.log("[ALLOCATOR] available =", JSON.stringify(available));
+    console.log("[ALLOCATOR] eligible =", JSON.stringify(eligible));
+    console.log("[ALLOCATOR] sorted =", JSON.stringify(sorted));
+    console.log("[ALLOCATOR] pool =", JSON.stringify(pool));
+    console.log("[ALLOCATOR] distributed =", JSON.stringify(state.distributed));
+    console.log("[ALLOCATOR] cooldowns =", JSON.stringify(cooldowns));
+    console.log("[ALLOCATOR] recentHistory =", JSON.stringify(recentHistory));
+    console.log("[ALLOCATOR] randomK =", state.randomK);
+
     if (preferredPal && pool.includes(preferredPal)) {
+        console.log("[ALLOCATOR] returning preferredPal =", preferredPal);
         return preferredPal;
     }
 
-    return pool[Math.floor(Math.random() * pool.length)];
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    console.log("[ALLOCATOR] returning random pick =", picked);
+    return picked;
 }
 
 export default {
@@ -154,7 +163,8 @@ export class InventoryDO {
                 distributed: zeroMap(),
                 totalAssigned: 0,
                 recentHistory: [],
-                cooldowns: zeroMap()
+                cooldowns: zeroMap(),
+                requestCount: 0
             };
 
             await this.ctx.storage.put("state", state);
@@ -219,7 +229,17 @@ export class InventoryDO {
 
         const preferredPal = getPreferredPal(scores, answerHistory);
         const state = await this.loadState();
+        state.requestCount = Number(state.requestCount || 0) + 1;
+        console.log("[BACKEND] requestCount =", state.requestCount);
+
         const assignedPal = chooseAssignedPal(state, preferredPal);
+
+        console.log("[BACKEND] preferredPal =", preferredPal);
+        console.log("[BACKEND] assignedPal =", assignedPal);
+        console.log("[BACKEND] recentHistory(before) =", JSON.stringify(state.recentHistory));
+        console.log("[BACKEND] cooldowns(before) =", JSON.stringify(state.cooldowns));
+        console.log("[BACKEND] distributed(before) =", JSON.stringify(state.distributed));
+        console.log("[BACKEND] stock(before) =", JSON.stringify(state.stock));
 
         if (!assignedPal) {
             return json({ error: "All pals are out of stock." }, 409);
@@ -262,9 +282,15 @@ export class InventoryDO {
 
         await this.saveState(state);
 
+        console.log("[BACKEND] recentHistory(after) =", JSON.stringify(state.recentHistory));
+        console.log("[BACKEND] cooldowns(after) =", JSON.stringify(state.cooldowns));
+        console.log("[BACKEND] distributed(after) =", JSON.stringify(state.distributed));
+        console.log("[BACKEND] stock(after) =", JSON.stringify(state.stock));
+
         return json({
             assignedPal,
             preferredPal,
+            requestCount: state.requestCount,
             remainingTotal: totalRemaining(state.stock),
             stock: state.stock
         });

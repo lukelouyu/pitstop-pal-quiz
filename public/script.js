@@ -177,19 +177,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
 
     if (tied.length === 1) {
+      console.log("[FRONTEND] getTopPal unique =", tied[0]);
       return tied[0];
     }
 
     for (let i = answerHistory.length - 1; i >= 0; i -= 1) {
       if (tied.includes(answerHistory[i])) {
+        console.log("[FRONTEND] getTopPal tie-broken =", answerHistory[i]);
         return answerHistory[i];
       }
     }
 
+    console.log("[FRONTEND] getTopPal fallback =", tied[0]);
     return tied[0];
   }
 
   function renderAssignedPal(palKey) {
+    console.log("[FRONTEND] rendering pal =", palKey);
+
     if (typeof pals === "undefined") {
       showDataError("pals is missing. Please check data.js for errors.");
       return;
@@ -198,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const result = pals[palKey];
 
     if (!result) {
+      console.error("[FRONTEND] result not found for pal =", palKey);
       showDataError("Result data is missing.");
       return;
     }
@@ -232,6 +238,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isSubmittingResult) return;
     isSubmittingResult = true;
 
+    const localPreferredPal = getTopPal();
+    console.log("[FRONTEND] local preferredPal =", localPreferredPal);
+    console.log("[FRONTEND] scores =", JSON.stringify(scores));
+    console.log("[FRONTEND] answerHistory =", JSON.stringify(answerHistory));
+
     if (questionTitle) {
       questionTitle.textContent = "Assigning your PitStop Pal...";
     }
@@ -258,12 +269,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
 
+      console.log("[FRONTEND] API response =", data);
+      console.log("[FRONTEND] requestCount =", data.requestCount);
+
       if (!response.ok) {
         throw new Error(data.error || "Unable to assign a pal.");
       }
 
+      console.log("[FRONTEND] assignedPal from backend =", data.assignedPal);
+      console.log("[FRONTEND] preferredPal from backend =", data.preferredPal);
+
       renderAssignedPal(data.assignedPal);
     } catch (error) {
+      console.error("[FRONTEND] showResult error =", error);
       showDataError(error.message || "Something went wrong while assigning the result.");
     } finally {
       isSubmittingResult = false;
