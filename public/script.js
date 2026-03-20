@@ -36,6 +36,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentQuestions = [];
   let rankedPals = [];
 
+  const currentScript = document.querySelector('script[src$="script.js"]');
+  const assetBase = currentScript ? new URL(".", currentScript.src).href : window.location.href;
+
+  function getAssetUrl(fileName) {
+    return new URL(fileName, assetBase).href;
+  }
+
   function createEmptyScores() {
     return {
       perry: 0,
@@ -234,8 +241,12 @@ document.addEventListener("DOMContentLoaded", () => {
     lastResultKey = palKey;
 
     if (resultImage) {
-      resultImage.src = result.image;
+      resultImage.src = getAssetUrl(result.image);
       resultImage.alt = result.short;
+
+      resultImage.onerror = () => {
+        console.error("Failed to load result image:", resultImage.src);
+      };
     }
 
     if (resultName) {
@@ -329,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "pal-mini-card";
       card.innerHTML = `
-        <img src="${pal.image}" alt="${pal.short}">
+        <img src="${getAssetUrl(pal.image)}" alt="${pal.short}">
         <div>
           <strong>${pal.name}</strong>
           <span>${pal.badge}</span>
