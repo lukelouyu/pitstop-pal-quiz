@@ -6,9 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const testBtn = document.getElementById("test-btn");
   const actualBtn = document.getElementById("actual-btn");
   const refreshBtn = document.getElementById("refresh-btn");
-  const saveRandomKBtn = document.getElementById("save-random-k-btn");
   const saveStockBtn = document.getElementById("save-stock-btn");
-  const randomKInput = document.getElementById("random-k");
   const stockGrid = document.getElementById("stock-grid");
   const status = document.getElementById("status");
   const summary = document.getElementById("summary");
@@ -60,11 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderSummary(data) {
-    summary.textContent = JSON.stringify(data, null, 2);
-
-    if (typeof data.randomK === "number") {
-      randomKInput.value = data.randomK;
-    }
+    summary.textContent = JSON.stringify({
+      mode: data.mode,
+      initialStock: data.initialStock,
+      stock: data.stock,
+      distributed: data.distributed,
+      totalAssigned: data.totalAssigned,
+      remainingTotal: data.remainingTotal
+    }, null, 2);
 
     if (data.stock) {
       renderStockInputs(data.stock);
@@ -111,30 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function saveRandomK() {
-    try {
-      setStatus("Saving random-k...");
-
-      const response = await api("/api/admin/random-k", {
-        method: "POST",
-        body: JSON.stringify({
-          randomK: Number(randomKInput.value)
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to save random-k.");
-      }
-
-      renderSummary(data.state);
-      setStatus(data.message);
-    } catch (error) {
-      setStatus(error.message || "Unable to save random-k.");
-    }
-  }
-
   async function saveStock() {
     try {
       setStatus("Saving stock...");
@@ -163,7 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshBtn.addEventListener("click", loadState);
   testBtn.addEventListener("click", () => applyPreset("test"));
   actualBtn.addEventListener("click", () => applyPreset("actual"));
-  saveRandomKBtn.addEventListener("click", saveRandomK);
   saveStockBtn.addEventListener("click", saveStock);
 
   renderStockInputs();

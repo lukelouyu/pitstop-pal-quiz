@@ -1,421 +1,362 @@
 import { ACTUAL_STOCK, PAL_KEYS, TEST_STOCK } from "./constants.js";
 
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
+const STOCK_THRESHOLD = 0.30;
 
 function normalizeMap(map) {
-    return Object.fromEntries(
-        PAL_KEYS.map((key) => [key, Math.max(0, Math.floor(Number(map?.[key] || 0)))])
-    );
-}
-
-function countRecent(history, key, windowSize) {
-    return history.slice(-windowSize).filter((x) => x === key).length;
-}
-
-function tickCooldowns(cooldowns) {
-    const next = normalizeMap(cooldowns);
-
-    for (const key of PAL_KEYS) {
-        if (next[key] > 0) {
-            next[key] -= 1;
-        }
-    }
-
-    return next;
+  return Object.fromEntries(
+    PAL_KEYS.map((key) => [key, Math.max(0, Math.floor(Number(map?.[key] || 0)))])
+  );
 }
 
 function zeroMap() {
-    return Object.fromEntries(PAL_KEYS.map((key) => [key, 0]));
+  return Object.fromEntries(PAL_KEYS.map((key) => [key, 0]));
 }
 
 function totalRemaining(stock) {
-    return Object.values(stock).reduce((sum, value) => sum + value, 0);
+  return Object.values(stock).reduce((sum, value) => sum + value, 0);
+}
+
+function remainingRatio(state, palKey) {
+  const initial = Number(state.initialStock?.[palKey] || 0);
+  if (initial <= 0) return 0;
+  return Number(state.stock?.[palKey] || 0) / initial;
 }
 
 function json(data, status = 200) {
-    return new Response(JSON.stringify(data), {
-        status,
-        headers: {
-            "content-type": "application/json; charset=utf-8",
-            "cache-control": "no-store"
-        }
-    });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    }
+  });
 }
 
 function badRequest(message) {
-    return json({ error: message }, 400);
+  return json({ error: message }, 400);
 }
 
 function unauthorized() {
-    return json({ error: "Unauthorized" }, 401);
+  return json({ error: "Unauthorized" }, 401);
 }
 
 function getPreferredPal(scores, answerHistory) {
-    const safeScores = Object.fromEntries(
-        PAL_KEYS.map((key) => [key, Number(scores?.[key] || 0)])
-    );
+  const safeScores = Object.fromEntries(
+    PAL_KEYS.map((key) => [key, Number(scores?.[key] || 0)])
+  );
 
-    const maxScore = Math.max(...Object.values(safeScores));
-    const tied = PAL_KEYS.filter((key) => safeScores[key] === maxScore);
+  const maxScore = Math.max(...Object.values(safeScores));
+  const tied = PAL_KEYS.filter((key) => safeScores[key] === maxScore);
 
-    if (tied.length === 1) {
-        return tied[0];
+  if (tied.length === 1) {
+    return tied[0];
+  }
+
+  for (let i = answerHistory.length - 1; i >= 0; i -= 1) {
+    if (tied.includes(answerHistory[i])) {
+      return answerHistory[i];
     }
+  }
 
-    for (let i = answerHistory.length - 1; i >= 0; i -= 1) {
-        if (tied.includes(answerHistory[i])) {
-            return answerHistory[i];
-        }
-    }
-
-    return tied[0] || PAL_KEYS[0];
+  return tied[0] || PAL_KEYS[0];
 }
 
-function chooseAssignedPal(state, preferredPal) {
-    const available = PAL_KEYS.filter((key) => state.stock[key] > 0);
+function chooseAssignedPal(state, preferredPal, rankedPals = []) {
+  const orderedPrefs = [
+    preferredPal,
+    ...rankedPals.filter((key) => key !== preferredPal)
+  ].filter((key) => PAL_KEYS.includes(key));
 
-    if (available.length === 0) {
-        console.log("[ALLOCATOR] no stock available");
-        return null;
-    }
+  console.log("[ALLOCATOR] preferredPal =", preferredPal);
+  console.log("[ALLOCATOR] rankedPals =", JSON.stringify(rankedPals));
+  console.log("[ALLOCATOR] stock =", JSON.stringify(state.stock));
+  console.log("[ALLOCATOR] initialStock =", JSON.stringify(state.initialStock));
+  console.log("[ALLOCATOR] distributed =", JSON.stringify(state.distributed));
 
-    const recentHistory = Array.isArray(state.recentHistory) ? state.recentHistory : [];
-    const cooldowns = normalizeMap(state.cooldowns);
+  const healthyPreferred = orderedPrefs.find((key) => {
+    return state.stock[key] > 0 && remainingRatio(state, key) >= STOCK_THRESHOLD;
+  });
 
-    let eligible = available.filter((key) => cooldowns[key] === 0);
+  if (healthyPreferred) {
+    console.log("[ALLOCATOR] assign preferred/next healthy =", healthyPreferred);
+    return {
+      assignedPal: healthyPreferred,
+      reason: "preferred_within_threshold"
+    };
+  }
 
-    if (eligible.length === 0) {
-        eligible = available;
-    }
+  const available = PAL_KEYS.filter((key) => state.stock[key] > 0);
 
-    const sorted = [...eligible].sort((a, b) => {
-        const byDistributed = state.distributed[a] - state.distributed[b];
-        if (byDistributed !== 0) return byDistributed;
+  if (available.length === 0) {
+    console.log("[ALLOCATOR] no stock available");
+    return null;
+  }
 
-        const byRecent = countRecent(recentHistory, a, 6) - countRecent(recentHistory, b, 6);
-        if (byRecent !== 0) return byRecent;
+  const fallback = [...available].sort((a, b) => {
+    const byDistributed = state.distributed[a] - state.distributed[b];
+    if (byDistributed !== 0) return byDistributed;
 
-        const byStock = state.stock[b] - state.stock[a];
-        if (byStock !== 0) return byStock;
+    const byRatio = remainingRatio(state, b) - remainingRatio(state, a);
+    if (byRatio !== 0) return byRatio;
 
-        return Math.random() - 0.5;
-    });
+    return state.stock[b] - state.stock[a];
+  })[0];
 
-    const k = Math.max(1, Math.min(Number(state.randomK || 1), sorted.length));
-    let pool = sorted.slice(0, k);
+  console.log("[ALLOCATOR] fallback least distributed =", fallback);
 
-    const lastAssigned = recentHistory[recentHistory.length - 1];
-    if (pool.length > 1 && lastAssigned) {
-        const withoutImmediateRepeat = pool.filter((key) => key !== lastAssigned);
-        if (withoutImmediateRepeat.length > 0) {
-            pool = withoutImmediateRepeat;
-        }
-    }
-
-    console.log("[ALLOCATOR] preferredPal =", preferredPal);
-    console.log("[ALLOCATOR] available =", JSON.stringify(available));
-    console.log("[ALLOCATOR] eligible =", JSON.stringify(eligible));
-    console.log("[ALLOCATOR] sorted =", JSON.stringify(sorted));
-    console.log("[ALLOCATOR] pool =", JSON.stringify(pool));
-    console.log("[ALLOCATOR] distributed =", JSON.stringify(state.distributed));
-    console.log("[ALLOCATOR] cooldowns =", JSON.stringify(cooldowns));
-    console.log("[ALLOCATOR] recentHistory =", JSON.stringify(recentHistory));
-    console.log("[ALLOCATOR] randomK =", state.randomK);
-
-    if (preferredPal && pool.includes(preferredPal)) {
-        console.log("[ALLOCATOR] returning preferredPal =", preferredPal);
-        return preferredPal;
-    }
-
-    const picked = pool[Math.floor(Math.random() * pool.length)];
-    console.log("[ALLOCATOR] returning random pick =", picked);
-    return picked;
+  return {
+    assignedPal: fallback,
+    reason: "least_distributed_fallback"
+  };
 }
 
 export default {
-    async fetch(request, env) {
-        const url = new URL(request.url);
+  async fetch(request, env) {
+    const url = new URL(request.url);
 
-        if (url.pathname.startsWith("/api/")) {
-            const id = env.INVENTORY.idFromName("global-stock");
-            const stub = env.INVENTORY.get(id);
-            return stub.fetch(request);
-        }
-
-        return new Response("Not found", { status: 404 });
+    if (url.pathname.startsWith("/api/")) {
+      const id = env.INVENTORY.idFromName("global-stock");
+      const stub = env.INVENTORY.get(id);
+      return stub.fetch(request);
     }
+
+    return new Response("Not found", { status: 404 });
+  }
 };
 
 export class InventoryDO {
-    constructor(ctx, env) {
-        this.ctx = ctx;
-        this.env = env;
+  constructor(ctx, env) {
+    this.ctx = ctx;
+    this.env = env;
+  }
+
+  async loadState() {
+    let state = await this.ctx.storage.get("state");
+    let changed = false;
+
+    if (!state) {
+      state = {
+        mode: "actual",
+        initialStock: clone(ACTUAL_STOCK),
+        stock: clone(ACTUAL_STOCK),
+        distributed: zeroMap(),
+        totalAssigned: 0,
+        requestCount: 0
+      };
+      changed = true;
     }
 
-    async loadState() {
-        let state = await this.ctx.storage.get("state");
+    state.mode = state.mode || "actual";
 
-        if (!state) {
-            state = {
-                mode: "actual",
-                randomK: Number(this.env.RANDOM_K || 3),
-                stock: clone(ACTUAL_STOCK),
-                distributed: zeroMap(),
-                totalAssigned: 0,
-                recentHistory: [],
-                cooldowns: zeroMap(),
-                requestCount: 0
-            };
+    const defaultBase =
+      state.mode === "test"
+        ? TEST_STOCK
+        : state.mode === "actual"
+          ? ACTUAL_STOCK
+          : (state.stock || ACTUAL_STOCK);
 
-            await this.ctx.storage.put("state", state);
-        }
-
-        state.recentHistory = Array.isArray(state.recentHistory) ? state.recentHistory : [];
-        state.cooldowns = normalizeMap(state.cooldowns);
-
-        return state;
+    if (!state.initialStock) {
+      state.initialStock = clone(defaultBase);
+      changed = true;
     }
 
-    async saveState(state) {
-        await this.ctx.storage.put("state", state);
+    state.initialStock = normalizeMap(state.initialStock);
+    state.stock = normalizeMap(state.stock || defaultBase);
+    state.distributed = normalizeMap(state.distributed || zeroMap());
+    state.totalAssigned = Math.max(0, Math.floor(Number(state.totalAssigned || 0)));
+    state.requestCount = Math.max(0, Math.floor(Number(state.requestCount || 0)));
+
+    if (changed) {
+      await this.ctx.storage.put("state", state);
     }
 
-    isAdmin(request) {
-        const provided = request.headers.get("x-admin-key");
-        return Boolean(this.env.ADMIN_KEY) && provided === this.env.ADMIN_KEY;
+    return state;
+  }
+
+  async saveState(state) {
+    await this.ctx.storage.put("state", state);
+  }
+
+  isAdmin(request) {
+    const provided = request.headers.get("x-admin-key");
+    return Boolean(this.env.ADMIN_KEY) && provided === this.env.ADMIN_KEY;
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+
+    if (request.method === "POST" && url.pathname === "/api/quiz/assign") {
+      return this.handleAssign(request);
     }
 
-    async fetch(request) {
-        const url = new URL(request.url);
-
-        if (request.method === "POST" && url.pathname === "/api/quiz/assign") {
-            return this.handleAssign(request);
-        }
-
-        if (!this.isAdmin(request)) {
-            return unauthorized();
-        }
-
-        if (request.method === "GET" && url.pathname === "/api/admin/state") {
-            return this.handleGetState();
-        }
-
-        if (request.method === "POST" && url.pathname === "/api/admin/preset") {
-            return this.handlePreset(request);
-        }
-
-        if (request.method === "POST" && url.pathname === "/api/admin/stocks") {
-            return this.handleStocks(request);
-        }
-
-        if (request.method === "POST" && url.pathname === "/api/admin/random-k") {
-            return this.handleRandomK(request);
-        }
-
-        return json({ error: "Not found" }, 404);
+    if (!this.isAdmin(request)) {
+      return unauthorized();
     }
 
-    async handleAssign(request) {
-        let body;
-
-        try {
-            body = await request.json();
-        } catch {
-            return badRequest("Invalid JSON body.");
-        }
-
-        const scores = body?.scores || {};
-        const answerHistory = Array.isArray(body?.answerHistory) ? body.answerHistory : [];
-
-        const preferredPal = getPreferredPal(scores, answerHistory);
-        const state = await this.loadState();
-        state.requestCount = Number(state.requestCount || 0) + 1;
-        console.log("[BACKEND] requestCount =", state.requestCount);
-
-        const assignedPal = chooseAssignedPal(state, preferredPal);
-
-        console.log("[BACKEND] preferredPal =", preferredPal);
-        console.log("[BACKEND] assignedPal =", assignedPal);
-        console.log("[BACKEND] recentHistory(before) =", JSON.stringify(state.recentHistory));
-        console.log("[BACKEND] cooldowns(before) =", JSON.stringify(state.cooldowns));
-        console.log("[BACKEND] distributed(before) =", JSON.stringify(state.distributed));
-        console.log("[BACKEND] stock(before) =", JSON.stringify(state.stock));
-
-        if (!assignedPal) {
-            return json({ error: "All pals are out of stock." }, 409);
-        }
-
-        state.stock[assignedPal] -= 1;
-        state.distributed[assignedPal] += 1;
-        state.totalAssigned += 1;
-
-        state.recentHistory = Array.isArray(state.recentHistory) ? state.recentHistory : [];
-        state.recentHistory.push(assignedPal);
-
-        if (state.recentHistory.length > 10) {
-            state.recentHistory.shift();
-        }
-
-        // one assignment has passed -> tick down existing cooldowns
-        state.cooldowns = tickCooldowns(state.cooldowns);
-
-        // if this pal appears too much recently, ban it for the next few assignments
-        const recent4 = countRecent(state.recentHistory, assignedPal, 4);
-        const recent6 = countRecent(state.recentHistory, assignedPal, 6);
-
-        let cooldownToApply = 0;
-
-        if (recent4 >= 3) {
-            cooldownToApply = 2;
-        }
-
-        if (recent6 >= 4) {
-            cooldownToApply = 3;
-        }
-
-        if (cooldownToApply > 0) {
-            state.cooldowns[assignedPal] = Math.max(
-                Number(state.cooldowns[assignedPal] || 0),
-                cooldownToApply
-            );
-        }
-
-        await this.saveState(state);
-
-        console.log("[BACKEND] recentHistory(after) =", JSON.stringify(state.recentHistory));
-        console.log("[BACKEND] cooldowns(after) =", JSON.stringify(state.cooldowns));
-        console.log("[BACKEND] distributed(after) =", JSON.stringify(state.distributed));
-        console.log("[BACKEND] stock(after) =", JSON.stringify(state.stock));
-
-        return json({
-            assignedPal,
-            preferredPal,
-            requestCount: state.requestCount,
-            remainingTotal: totalRemaining(state.stock),
-            stock: state.stock
-        });
+    if (request.method === "GET" && url.pathname === "/api/admin/state") {
+      return this.handleGetState();
     }
 
-    async handleGetState() {
-        const state = await this.loadState();
-
-        return json({
-            mode: state.mode,
-            randomK: state.randomK,
-            stock: state.stock,
-            distributed: state.distributed,
-            totalAssigned: state.totalAssigned,
-            remainingTotal: totalRemaining(state.stock),
-            cooldowns: state.cooldowns
-        });
+    if (request.method === "POST" && url.pathname === "/api/admin/preset") {
+      return this.handlePreset(request);
     }
 
-    async handlePreset(request) {
-        let body;
-
-        try {
-            body = await request.json();
-        } catch {
-            return badRequest("Invalid JSON body.");
-        }
-
-        const mode = body?.mode;
-
-        if (mode !== "test" && mode !== "actual") {
-            return badRequest("mode must be 'test' or 'actual'.");
-        }
-
-        const state = {
-            mode,
-            randomK: Number(this.env.RANDOM_K || 3),
-            stock: clone(mode === "test" ? TEST_STOCK : ACTUAL_STOCK),
-            distributed: zeroMap(),
-            totalAssigned: 0,
-            recentHistory: [],
-            cooldowns: zeroMap()
-        };
-
-        await this.saveState(state);
-
-        return json({
-            ok: true,
-            message: `${mode} preset applied.`,
-            state: {
-                ...state,
-                remainingTotal: totalRemaining(state.stock)
-            }
-        });
+    if (request.method === "POST" && url.pathname === "/api/admin/stocks") {
+      return this.handleStocks(request);
     }
 
-    async handleStocks(request) {
-        let body;
+    return json({ error: "Not found" }, 404);
+  }
 
-        try {
-            body = await request.json();
-        } catch {
-            return badRequest("Invalid JSON body.");
-        }
+  async handleAssign(request) {
+    let body;
 
-        const incoming = body?.stock || {};
-        const state = await this.loadState();
-
-        const nextStock = {};
-
-        for (const key of PAL_KEYS) {
-            const value = Number(incoming[key]);
-
-            if (!Number.isFinite(value) || value < 0) {
-                return badRequest(`Invalid stock value for ${key}.`);
-            }
-
-            nextStock[key] = Math.floor(value);
-        }
-
-        state.mode = "custom";
-        state.stock = nextStock;
-        state.distributed = zeroMap();
-        state.totalAssigned = 0;
-        state.recentHistory = [];
-        state.cooldowns = zeroMap();
-
-        await this.saveState(state);
-
-        return json({
-            ok: true,
-            message: "Stock updated.",
-            state: {
-                ...state,
-                remainingTotal: totalRemaining(state.stock)
-            }
-        });
+    try {
+      body = await request.json();
+    } catch {
+      return badRequest("Invalid JSON body.");
     }
 
-    async handleRandomK(request) {
-        let body;
+    const scores = body?.scores || {};
+    const answerHistory = Array.isArray(body?.answerHistory) ? body.answerHistory : [];
 
-        try {
-            body = await request.json();
-        } catch {
-            return badRequest("Invalid JSON body.");
-        }
+    const preferredPal = PAL_KEYS.includes(body?.preferredPal)
+      ? body.preferredPal
+      : getPreferredPal(scores, answerHistory);
 
-        const randomK = Number(body?.randomK);
-        const state = await this.loadState();
+    const rankedPals = Array.isArray(body?.rankedPals)
+      ? [...new Set(body.rankedPals.filter((key) => PAL_KEYS.includes(key)))]
+      : [preferredPal];
 
-        if (!Number.isInteger(randomK) || randomK < 1 || randomK > PAL_KEYS.length) {
-            return badRequest(`randomK must be an integer from 1 to ${PAL_KEYS.length}.`);
-        }
+    const state = await this.loadState();
+    state.requestCount = Number(state.requestCount || 0) + 1;
 
-        state.randomK = randomK;
-        await this.saveState(state);
+    console.log("[BACKEND] requestCount =", state.requestCount);
 
-        return json({
-            ok: true,
-            message: "randomK updated.",
-            state: {
-                ...state,
-                remainingTotal: totalRemaining(state.stock)
-            }
-        });
+    const allocation = chooseAssignedPal(state, preferredPal, rankedPals);
+
+    if (!allocation) {
+      return json({ error: "All pals are out of stock." }, 409);
     }
+
+    const assignedPal = allocation.assignedPal;
+
+    console.log("[BACKEND] preferredPal =", preferredPal);
+    console.log("[BACKEND] assignedPal =", assignedPal);
+    console.log("[BACKEND] stock(before) =", JSON.stringify(state.stock));
+    console.log("[BACKEND] distributed(before) =", JSON.stringify(state.distributed));
+
+    state.stock[assignedPal] -= 1;
+    state.distributed[assignedPal] += 1;
+    state.totalAssigned += 1;
+
+    await this.saveState(state);
+
+    console.log("[BACKEND] stock(after) =", JSON.stringify(state.stock));
+    console.log("[BACKEND] distributed(after) =", JSON.stringify(state.distributed));
+
+    return json({
+      assignedPal,
+      preferredPal,
+      rankedPals,
+      allocationReason: allocation.reason,
+      requestCount: state.requestCount,
+      remainingTotal: totalRemaining(state.stock),
+      stock: state.stock
+    });
+  }
+
+  async handleGetState() {
+    const state = await this.loadState();
+
+    return json({
+      mode: state.mode,
+      initialStock: state.initialStock,
+      stock: state.stock,
+      distributed: state.distributed,
+      totalAssigned: state.totalAssigned,
+      remainingTotal: totalRemaining(state.stock)
+    });
+  }
+
+  async handlePreset(request) {
+    let body;
+
+    try {
+      body = await request.json();
+    } catch {
+      return badRequest("Invalid JSON body.");
+    }
+
+    const mode = body?.mode;
+
+    if (mode !== "test" && mode !== "actual") {
+      return badRequest("mode must be 'test' or 'actual'.");
+    }
+
+    const baseStock = clone(mode === "test" ? TEST_STOCK : ACTUAL_STOCK);
+
+    const state = {
+      mode,
+      initialStock: clone(baseStock),
+      stock: clone(baseStock),
+      distributed: zeroMap(),
+      totalAssigned: 0,
+      requestCount: 0
+    };
+
+    await this.saveState(state);
+
+    return json({
+      ok: true,
+      message: `${mode} preset applied.`,
+      state: {
+        ...state,
+        remainingTotal: totalRemaining(state.stock)
+      }
+    });
+  }
+
+  async handleStocks(request) {
+    let body;
+
+    try {
+      body = await request.json();
+    } catch {
+      return badRequest("Invalid JSON body.");
+    }
+
+    const incoming = body?.stock || {};
+    const state = await this.loadState();
+    const nextStock = {};
+
+    for (const key of PAL_KEYS) {
+      const value = Number(incoming[key]);
+
+      if (!Number.isFinite(value) || value < 0) {
+        return badRequest(`Invalid stock value for ${key}.`);
+      }
+
+      nextStock[key] = Math.floor(value);
+    }
+
+    state.mode = "custom";
+    state.initialStock = clone(nextStock);
+    state.stock = clone(nextStock);
+    state.distributed = zeroMap();
+    state.totalAssigned = 0;
+    state.requestCount = 0;
+
+    await this.saveState(state);
+
+    return json({
+      ok: true,
+      message: "Stock updated.",
+      state: {
+        ...state,
+        remainingTotal: totalRemaining(state.stock)
+      }
+    });
+  }
 }
