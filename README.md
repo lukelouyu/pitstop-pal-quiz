@@ -66,7 +66,7 @@ This allows the event team to continue engaging students smoothly without manual
 
 ## 2. What the current quiz flow looks like
 
-The current live code uses a **6-question bracket system**, not the old 14-question scoring version.
+The current live code uses a **6-question bracket system**.
 
 The bracket is:
 
@@ -112,6 +112,9 @@ This page lets organisers:
 
 ### Why this matters
 Without the admin page, the quiz could continue showing a pal whose welfare packs are already finished. The admin page keeps the quiz aligned with real event inventory.
+
+### Link
+https://pitstop-pal-quiz.lukelousg.workers.dev/
 
 ---
 
