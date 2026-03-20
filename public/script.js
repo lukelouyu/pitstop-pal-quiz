@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     rankedPals = ranking;
 
     return adaptiveTemplates.map((template, index) => {
-      const optionCount = index < 2 ? 3 : 4;
+      const optionCount = index < 3 ? 2 : 4;
 
       const selectedPals = getAdaptiveCandidatesForQuestion(template.id).slice(
         0,
@@ -149,6 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function getTotalQuestionCount() {
+    return fixedQuestions.length + adaptiveTemplates.length;
+  }
+
   function showScreen(screen) {
     [startScreen, quizScreen, resultScreen, allPalsScreen].forEach((section) => {
       if (section) {
@@ -181,9 +185,16 @@ document.addEventListener("DOMContentLoaded", () => {
     answerHistory = [];
     userAnswers = [];
     rankedPals = [];
-    currentQuestions = [...fixedQuestions];
+    updateQuestionSet();
     showScreen(quizScreen);
     renderQuestion();
+  }
+
+  function getVisibleOptions(item) {
+    if (!item || !Array.isArray(item.a)) {
+      return [];
+    }
+    return [...item.a];
   }
 
   function renderQuestion() {
@@ -212,7 +223,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (!Array.isArray(item.a) || item.a.length === 0) {
+    const visibleOptions = getVisibleOptions(item);
+
+    if (!Array.isArray(visibleOptions) || visibleOptions.length === 0) {
       showDataError(`No valid options found for ${item.id || "this question"}.`);
       return;
     }
@@ -221,10 +234,11 @@ document.addEventListener("DOMContentLoaded", () => {
       backPrevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
     }
 
-    const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+    const totalQuestionCount = getTotalQuestionCount();
+    const progress = ((currentQuestionIndex + 1) / totalQuestionCount) * 100;
 
     if (progressText) {
-      progressText.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+      progressText.textContent = `Question ${currentQuestionIndex + 1} of ${totalQuestionCount}`;
     }
 
     if (progressPercent) {
@@ -246,9 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!optionsContainer) return;
     optionsContainer.innerHTML = "";
 
-    item.a.forEach((opt) => {
-      if (!opt || !opt.pal || !opt.text) return;
-
+    visibleOptions.forEach((opt) => {
       const pal = pals[opt.pal];
       if (!pal) return;
 
@@ -265,21 +277,15 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Option clicked:", opt.text, "| pal =", opt.pal, "| qIndex =", currentQuestionIndex);
 
         userAnswers[currentQuestionIndex] = cloneAnswer(opt);
-        userAnswers = userAnswers.slice(0, currentQuestionIndex + 1);
 
         recalculateStateFromAnswers();
         updateQuestionSet();
 
         currentQuestionIndex += 1;
 
-        console.log("After click, currentQuestionIndex =", currentQuestionIndex, "currentQuestions.length =", currentQuestions.length);
-        console.log("[FRONTEND] scores =", JSON.stringify(scores));
-        console.log("[FRONTEND] answerHistory =", JSON.stringify(answerHistory));
-
         if (currentQuestionIndex < currentQuestions.length) {
           renderQuestion();
         } else {
-          console.log("Reached final question. Calling showResult()...");
           await showResult();
         }
       });
@@ -423,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     scores = createEmptyScores();
     answerHistory = [];
     userAnswers = [];
-    currentQuestions = [];
+    currentQuestions = [...fixedQuestions];
     rankedPals = [];
     showScreen(startScreen);
   }
@@ -465,10 +471,14 @@ document.addEventListener("DOMContentLoaded", () => {
     backPrevBtn.addEventListener("click", () => {
       if (currentQuestionIndex > 0) {
         currentQuestionIndex -= 1;
+        userAnswers = userAnswers.slice(0, currentQuestionIndex);
+        recalculateStateFromAnswers();
+        updateQuestionSet();
         renderQuestion();
       }
     });
   }
 
+  currentQuestions = [...fixedQuestions];
   showScreen(startScreen);
 });
