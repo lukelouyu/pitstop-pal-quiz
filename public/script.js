@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let answerHistory = [];
   let isSubmittingResult = false;
 
+  let currentQuestions = [];
+  let rankedPals = [];
+
   function createEmptyScores() {
     return {
       perry: 0,
@@ -43,6 +46,40 @@ document.addEventListener("DOMContentLoaded", () => {
       tobi: 0,
       iggy: 0
     };
+  }
+
+  function getRankedPals() {
+    return [...Object.keys(scores)].sort((a, b) => {
+      const byScore = scores[b] - scores[a];
+      if (byScore !== 0) return byScore;
+
+      const lastA = answerHistory.lastIndexOf(a);
+      const lastB = answerHistory.lastIndexOf(b);
+      return lastB - lastA;
+    });
+  }
+
+  function buildAdaptiveQuestions() {
+    const ranking = getRankedPals();
+    rankedPals = ranking;
+
+    // top 4 gives enough variety without making the UI messy
+    const candidates = ranking.slice(0, 4);
+
+    return adaptiveTemplates.map((template, index) => {
+      const optionCount = index < 2 ? 3 : 4;
+
+      return {
+        id: template.id,
+        q: template.q,
+        sub: template.sub,
+        a: candidates.slice(0, optionCount).map((palKey) => ({
+          text: adaptiveOptionBank[palKey][template.id],
+          pal: palKey,
+          points: 1
+        }))
+      };
+    });
   }
 
   function showScreen(screen) {
@@ -73,13 +110,15 @@ document.addEventListener("DOMContentLoaded", () => {
     lastResultKey = null;
     scores = createEmptyScores();
     answerHistory = [];
+    rankedPals = [];
+    currentQuestions = [...fixedQuestions];
     showScreen(quizScreen);
     renderQuestion();
   }
 
   function renderQuestion() {
-    if (typeof questions === "undefined") {
-      showDataError("questions is missing. Please check that data.js is uploaded and linked correctly.");
+    if (!Array.isArray(currentQuestions) || currentQuestions.length === 0) {
+      showDataError("currentQuestions is empty. Please check quiz generation logic.");
       return;
     }
 
@@ -88,22 +127,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (!Array.isArray(questions) || questions.length === 0) {
-      showDataError("No quiz questions found in data.js.");
-      return;
-    }
-
-    const item = questions[currentQuestionIndex];
+    const item = currentQuestions[currentQuestionIndex];
 
     if (!item) {
       showDataError("Question data is invalid or missing.");
       return;
     }
 
-    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+    const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
 
     if (progressText) {
-      progressText.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+      progressText.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
     }
 
     if (progressPercent) {
@@ -157,9 +191,18 @@ document.addEventListener("DOMContentLoaded", () => {
         answerHistory.push(opt.pal);
         currentQuestionIndex += 1;
 
-        console.log("After click, currentQuestionIndex =", currentQuestionIndex, "questions.length =", questions.length);
+        // After fixed Q1-Q3, generate adaptive Q4-Q6 once
+        if (
+          currentQuestionIndex === fixedQuestions.length &&
+          currentQuestions.length === fixedQuestions.length
+        ) {
+          currentQuestions = [...fixedQuestions, ...buildAdaptiveQuestions()];
+          console.log("[FRONTEND] adaptive questions injected =", currentQuestions);
+        }
 
-        if (currentQuestionIndex < questions.length) {
+        console.log("After click, currentQuestionIndex =", currentQuestionIndex, "currentQuestions.length =", currentQuestions.length);
+
+        if (currentQuestionIndex < currentQuestions.length) {
           renderQuestion();
         } else {
           console.log("Reached final question. Calling showResult()...");
@@ -170,26 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       optionsContainer.appendChild(button);
     });
-  }
-
-  function getTopPal() {
-    const maxScore = Math.max(...Object.values(scores));
-    const tied = Object.keys(scores).filter((key) => scores[key] === maxScore);
-
-    if (tied.length === 1) {
-      console.log("[FRONTEND] getTopPal unique =", tied[0]);
-      return tied[0];
-    }
-
-    for (let i = answerHistory.length - 1; i >= 0; i -= 1) {
-      if (tied.includes(answerHistory[i])) {
-        console.log("[FRONTEND] getTopPal tie-broken =", answerHistory[i]);
-        return answerHistory[i];
-      }
-    }
-
-    console.log("[FRONTEND] getTopPal fallback =", tied[0]);
-    return tied[0];
   }
 
   function renderAssignedPal(palKey) {
@@ -238,8 +261,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isSubmittingResult) return;
     isSubmittingResult = true;
 
-    const localPreferredPal = getTopPal();
-    console.log("[FRONTEND] local preferredPal =", localPreferredPal);
+    const preferredPal = getRankedPals()[0];
+    const ranked = getRankedPals();
+
+    console.log("[FRONTEND] preferredPal =", preferredPal);
+    console.log("[FRONTEND] rankedPals =", JSON.stringify(ranked));
     console.log("[FRONTEND] scores =", JSON.stringify(scores));
     console.log("[FRONTEND] answerHistory =", JSON.stringify(answerHistory));
 
@@ -262,8 +288,11 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
+          preferredPal,
+          rankedPals: ranked,
           scores,
-          answerHistory
+          answerHistory,
+          quizVersion: "adaptive-6"
         })
       });
 
@@ -315,6 +344,8 @@ document.addEventListener("DOMContentLoaded", () => {
     lastResultKey = null;
     scores = createEmptyScores();
     answerHistory = [];
+    currentQuestions = [];
+    rankedPals = [];
     showScreen(startScreen);
   }
 

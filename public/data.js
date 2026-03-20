@@ -1,250 +1,160 @@
 const pals = {
   perry: {
+    name: "Perry",
     short: "Perry",
-    name: "Perry — Personal Skills",
-    badge: "Small steps, steady mind",
-    image: "perry.png",
-    color: "#f39a2b",
-    soft: "#fff1df",
-    desc: "You stay grounded by organising the chaos. Clear next steps help you feel calmer and more in control.",
-    tip: "Write down your top 3 priorities for tomorrow."
+    badge: "Your organised reset buddy",
+    desc: "You handle chaos by slowing down, sorting things out, and building a manageable plan.",
+    tip: "Take things one small step at a time.",
+    image: "images/perry.png",
+    color: "#7bb6ff",
+    soft: "#eaf4ff"
   },
   ping: {
+    name: "Ping",
     short: "Ping",
-    name: "Ping — Purpose",
-    badge: "Reconnect to meaning",
-    image: "ping.png",
-    color: "#4f9ff8",
-    soft: "#eaf4ff",
-    desc: "You recharge when you remember why something matters. Purpose helps you keep going even on difficult days.",
-    tip: "Ask yourself what matters most to you this week."
+    badge: "Your reflective guide",
+    desc: "You like to reconnect with meaning, purpose, and the bigger picture before moving forward.",
+    tip: "When stressed, return to your why.",
+    image: "images/ping.png",
+    color: "#b39ddb",
+    soft: "#f2ecfb"
   },
   ola: {
+    name: "Ola",
     short: "Ola",
-    name: "Ola — On The Move",
-    badge: "Move to reset",
-    image: "ola.png",
-    color: "#1b7fd0",
-    soft: "#e6f4ff",
-    desc: "Movement helps you breathe again. Walking, stretching, or getting outside gives you a healthier reset.",
-    tip: "Take a 10-minute walk between study blocks."
+    badge: "Your movement motivator",
+    desc: "You recharge best through motion, fresh air, and physical reset.",
+    tip: "A short walk can change your whole mood.",
+    image: "images/ola.png",
+    color: "#7fd6a3",
+    soft: "#eafaf1"
   },
   ty: {
+    name: "Ty",
     short: "Ty",
-    name: "Ty — Thoughtful Eating",
-    badge: "Fuel matters too",
-    image: "ty.png",
-    color: "#f1c232",
-    soft: "#fff7d9",
-    desc: "You care for yourself through nourishment and simple routines. Your energy improves when your body is looked after.",
-    tip: "Keep water and a simple snack nearby during long work sessions."
+    badge: "Your comfort fuel pal",
+    desc: "You regain energy through food, warmth, and simple physical care.",
+    tip: "Don’t forget to nourish yourself properly.",
+    image: "images/ty.png",
+    color: "#ffb870",
+    soft: "#fff2e4"
   },
   sky: {
+    name: "Sky",
     short: "Sky",
-    name: "Sky — Sleep",
-    badge: "Rest is productive",
-    image: "sky.png",
-    color: "#84b8ef",
-    soft: "#eef7ff",
-    desc: "You know rest is not laziness. Good sleep helps you recover, think better, and feel more like yourself.",
-    tip: "Aim to sleep a little earlier tonight."
+    badge: "Your rest-first companion",
+    desc: "You know that sometimes the best answer is to pause, sleep, and recover.",
+    tip: "Rest is productive too.",
+    image: "images/sky.png",
+    color: "#8ecae6",
+    soft: "#edf8fd"
   },
   tobi: {
+    name: "Tobi",
     short: "Tobi",
-    name: "Tobi — Timeout",
-    badge: "Pause with intention",
-    image: "tobi.png",
-    color: "#f1a7c1",
-    soft: "#fff0f6",
-    desc: "Pausing helps you return with a clearer mind. You value space, hobbies, and moments of real recovery.",
-    tip: "Take one proper 5-minute no-phone break today."
+    badge: "Your quiet reset buddy",
+    desc: "You prefer calm, hobbies, and a little personal space to reset your mind.",
+    tip: "A small enjoyable break can help you restart.",
+    image: "images/tobi.png",
+    color: "#f4a261",
+    soft: "#fff1e7"
   },
   iggy: {
+    name: "Iggy",
     short: "Iggy",
-    name: "Iggy — Interaction",
-    badge: "Connection gives strength",
-    image: "iggy.png",
-    color: "#35c178",
-    soft: "#e9fff2",
-    desc: "You feel better through connection. Talking, sharing, and being around people you trust helps you feel supported.",
-    tip: "Check in with one friend today."
+    badge: "Your social support pal",
+    desc: "You draw strength from connection, conversation, and being around people you trust.",
+    tip: "You don’t have to handle everything alone.",
+    image: "images/iggy.png",
+    color: "#f28482",
+    soft: "#fff0f0"
   }
 };
 
-const questions = [
-   {
+const PAL_KEYS = ["perry", "ping", "ola", "ty", "sky", "tobi", "iggy"];
+
+const fixedQuestions = [
+  {
+    id: "q1",
     q: "Q1 – CourseReg Storm",
-    sub: "Your timetable explodes into chaos. Everything is messy, there are modules with clashing time slots and full of uncertainty. What do you do first?",
+    sub: "Your timetable explodes into chaos. What do you do first?",
     a: [
-      {
-        text: "Pause. Breathe. Sort modules by priority and what you can realistically manage.",
-        pal: "perry",
-        points: 2,
-        extra: [{ pal: "ping", points: -1 }]
-      },
-      {
-        text: "Step back and ask which modules truly align with where you want to go in life.",
-        pal: "ping",
-        points: 1
-      }
+      { text: "Pause. Breathe. Sort modules by priority.", pal: "perry", points: 1 },
+      { text: "Step back and ask what aligns with your goals.", pal: "ping", points: 1 }
     ]
   },
   {
-    q: "Q2 – CCA Festival at Town Green",
-    sub: "You step into a vibrant hall filled with music, buzzing booths, and enthusiastic seniors inviting you to join. What naturally draws your attention?",
+    id: "q2",
+    q: "Q2 – CCA Fair at Town Green",
+    sub: "How do you tackle this CCA fair?",
     a: [
-      {
-        text: "A CCA with strong community, mentorship, and connection.",
-        pal: "iggy",
-        points: 2,
-        extra: [{ pal: "ola", points: -1 }]
-      },
-      {
-        text: "Something active that keeps you physically energised.",
-        pal: "ola",
-        points: 1
-      }
+      { text: "Explore around with friends.", pal: "iggy", points: 1 },
+      { text: "Go straight to the CCA that matches your interests.", pal: "tobi", points: 1 }
     ]
   },
   {
+    id: "q3",
     q: "Q3 – Unexpected Deadline",
-    sub: "An assignment deadline catches you off guard. You return to your room, staring at your screen as tension builds.",
+    sub: "Brain fog sets in. What do you do?",
     a: [
-      {
-        text: "You deliberately take a short time-out before doing anything.",
-        pal: "tobi",
-        points: 2,
-        extra: [{ pal: "sky", points: -1 }]
-      },
-      {
-        text: "You realise your sleep has been messy, so you fix that first.",
-        pal: "sky",
-        points: 1
-      }
-    ]
-  },
-  {
-    q: "Q4 – Snacker",
-    sub: "As you work through your assignment, brain fog sets in. What do you do?",
-    a: [
-      {
-        text: "Water. Balanced snack. Stabilise first.",
-        pal: "ty",
-        points: 2,
-        extra: [{ pal: "ola", points: -1 }]
-      },
-      {
-        text: "Quick brisk walk outside to clear your head.",
-        pal: "ola",
-        points: 1
-      }
-    ]
-  },
-  {
-    q: "Q5 – Guarding the Night",
-    sub: "It’s late. You’re not finished. The temptation of an all-nighter lingers. You decide:",
-    a: [
-      {
-        text: "Nothing is worth wrecking your sleep rhythm.",
-        pal: "sky",
-        points: 2,
-        extra: [{ pal: "ty", points: -1 }]
-      },
-      {
-        text: "You’ll prep nourishing meals to keep energy stable.",
-        pal: "ty",
-        points: 1
-      }
-    ]
-  },
-  {
-    q: "Q6 – Feelings of Jitters",
-    sub: "After a few days, you receive an email. Your result has been released. Your heart races. How do you steady yourself?",
-    a: [
-      {
-        text: "You move, stretch, walk, and release tension physically.",
-        pal: "ola",
-        points: 2,
-        extra: [{ pal: "perry", points: -1 }]
-      },
-      {
-        text: "You take five slow breaths and tell yourself that you can do it.",
-        pal: "perry",
-        points: 1
-      }
-    ]
-  },
-  {
-    q: "Q7 – After Receiving the Results",
-    sub: "The results you received were not up to your expectations. Now what?",
-    a: [
-      {
-        text: "You reflect on why this journey matters beyond one paper.",
-        pal: "ping",
-        points: 2,
-        extra: [{ pal: "iggy", points: -1 }]
-      },
-      {
-        text: "You call or text someone who understands.",
-        pal: "iggy",
-        points: 1
-      }
-    ]
-  },
-  {
-    q: "Q8 – Group Project Tension",
-    sub: "A message pops up. Two group mates are in disagreement about workload and responsibility. How will you react?",
-    a: [
-      { text: "Calmly clarify roles, expectations, and priorities.", pal: "perry", points: 1 },
-      { text: "Make space so everyone feels heard first.", pal: "iggy", points: 1 }
-    ]
-  },
-  {
-    q: "Q9 – Late Night Scroll Spiral",
-    sub: "The semester starts to clear up and you have more free time. It’s past midnight, and you wonder whether to keep scrolling.",
-    a: [
-      { text: "Phone down. Protect tomorrow by sleeping now.", pal: "sky", points: 1 },
-      { text: "Search for a few more encouraging quotes before sleeping.", pal: "iggy", points: 1 }
-    ]
-  },
-  {
-    q: "Q10 – Chill Afternoon",
-    sub: "You finally have free time. How will you use this time to recharge?",
-    a: [
-      { text: "Enjoy a quiet solo hobby.", pal: "tobi", points: 1 },
-      { text: "Explore a new walking path on campus.", pal: "ola", points: 1 }
-    ]
-  },
-  {
-    q: "Q11 – Motivation Wavers",
-    sub: "You begin to feel slightly disconnected from why you started this journey. What do you do?",
-    a: [
-      { text: "Reconnect to your bigger purpose.", pal: "ping", points: 1 },
-      { text: "Set one tiny achievable goal and start.", pal: "perry", points: 1 }
-    ]
-  },
-  {
-    q: "Q12 – Homesick Evening",
-    sub: "The journey has been a long one. You start to feel a little alone for one night.",
-    a: [
-      { text: "Reach out and talk about life or have a deep conversation with your friends.", pal: "ping", points: 1 },
-      { text: "Journal privately and sit with your thoughts.", pal: "tobi", points: 1 }
-    ]
-  },
-  {
-    q: "Q13 – Final Destination",
-    sub: "The Campus Cruise is approaching its final harbour. You have weathered storms, handled setbacks, and grown stronger. Before docking, you choose one final act of self-care.",
-    a: [
-      { text: "Scheduling small breaks intentionally.", pal: "tobi", points: 1 },
-      { text: "Planning balanced meals and water intake.", pal: "ty", points: 1 }
-    ]
-  },
-  {
-    q: "Q14 – Final Stretch",
-    sub: "This is the final night you have on the cruise. You want to celebrate the night. What do you choose?",
-    a: [
-      { text: "Give yourself a good rest as your reward.", pal: "sky", points: 1 },
-      { text: "Treat yourself to a luxurious meal.", pal: "ty", points: 1 }
+      { text: "Sleep first and continue later.", pal: "sky", points: 1 },
+      { text: "Grab a quick snack to power through.", pal: "ty", points: 1 }
     ]
   }
 ];
+
+const adaptiveTemplates = [
+  {
+    id: "q4",
+    q: "Q4 – Adaptive Reset",
+    sub: "A stressful moment hits. Which response feels most natural?"
+  },
+  {
+    id: "q5",
+    q: "Q5 – Adaptive Motivation",
+    sub: "You feel yourself wavering. What helps you restart?"
+  },
+  {
+    id: "q6",
+    q: "Q6 – Adaptive Celebration",
+    sub: "The week is over. How would you recharge?"
+  }
+];
+
+const adaptiveOptionBank = {
+  perry: {
+    q4: "Pause, sort the mess, and make a simple plan.",
+    q5: "Set one tiny achievable goal and begin there.",
+    q6: "Write down tomorrow’s priorities before resting."
+  },
+  ping: {
+    q4: "Reconnect with why this challenge matters to you.",
+    q5: "Reflect on your bigger purpose and values.",
+    q6: "Look back on what felt meaningful this semester."
+  },
+  ola: {
+    q4: "Move, stretch, or walk to release tension.",
+    q5: "Reset physically with fresh air and motion.",
+    q6: "Go for a walk and enjoy the outdoors."
+  },
+  ty: {
+    q4: "Stabilise with water and a simple snack first.",
+    q5: "Nourish yourself so your energy can return.",
+    q6: "Treat yourself to food that feels comforting."
+  },
+  sky: {
+    q4: "Step away and prioritise rest before reacting.",
+    q5: "Protect your sleep and recover properly.",
+    q6: "Catch up on proper rest and sleep early."
+  },
+  tobi: {
+    q4: "Take a short timeout before deciding anything.",
+    q5: "Do something you enjoy to reset your mind.",
+    q6: "Switch off and spend quiet time with your hobbies."
+  },
+  iggy: {
+    q4: "Reach out to someone and talk it through.",
+    q5: "Reconnect with someone who understands.",
+    q6: "Celebrate by catching up with friends."
+  }
+};
