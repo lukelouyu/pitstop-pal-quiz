@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Which PitStop Pal Are You?</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Nunito:wght@400;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="page">
     <div class="shell">
@@ -21,11 +23,8 @@
           </div>
 
           <div class="hero-card">
-            <img
-              src="Event Tele Post.png"
-              alt="PitStop Pal poster"
-              onerror="this.style.display='none'; document.getElementById('poster-fallback').style.display='flex';"
-            />
+            <img src="Event Tele Post.png" alt="PitStop Pal poster"
+              onerror="this.style.display='none'; document.getElementById('poster-fallback').style.display='flex';" />
             <div id="poster-fallback" class="poster-fallback" style="display:none;">
               <div>
                 <h2>Campus Cruise</h2>
@@ -57,15 +56,14 @@
               <div class="mini-mascot"><img src="tobi.png" alt="Tobi" /></div>
               <div class="mini-mascot"><img src="ty.png" alt="Ty" /></div>
             </div>
-            
           </div>
         </section>
 
         <!-- QUIZ SCREEN -->
         <section id="quiz-screen" class="screen hidden">
-          <div class="top-row">
-            <div class="tag">🚏 Campus Cruise</div>
-            <button id="back-home-btn" class="ghost-btn">Back to start</button>
+          <div class="quiz-nav">
+            <button id="back-start-btn" class="quiz-back-btn">Back to start</button>
+            <button id="back-prev-btn" class="quiz-back-btn hidden">Back to previous question</button>
           </div>
 
           <div class="progress-wrap">
@@ -88,7 +86,6 @@
         <!-- RESULT SCREEN -->
         <section id="result-screen" class="screen hidden">
           <div class="top-row">
-            <div class="tag">✨ Your PitStop Pal</div>
             <button id="result-home-btn" class="ghost-btn">Home</button>
           </div>
 
@@ -120,7 +117,6 @@
         <!-- ALL PALS SCREEN -->
         <section id="all-pals-screen" class="screen hidden">
           <div class="top-row">
-            <div class="tag">🌟 Meet the Pals</div>
             <button id="back-result-btn" class="ghost-btn">Back</button>
           </div>
 
@@ -132,7 +128,6 @@
             <div id="all-pals-grid" class="all-pals-grid"></div>
           </div>
         </section>
-
       </main>
     </div>
   </div>
@@ -140,4 +135,5 @@
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>

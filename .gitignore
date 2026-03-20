@@ -1,0 +1,6 @@
+﻿node_modules/
+backend/node_modules/
+.env
+.wrangler/
+.dev.vars
+node_modules/

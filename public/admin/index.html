@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PitStop Pal Admin</title>
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="card">
+      <h1>PitStop Pal Admin</h1>
+      <p class="sub">Use this page to view stock, reset presets, and manage stock for threshold-based allocation.</p>
+
+      <div class="row">
+        <label>
+          Admin password
+          <input id="admin-key" type="password" placeholder="Enter admin password" />
+        </label>
+        <button id="connect-btn">Connect</button>
+      </div>
+
+      <div id="status" class="status">Not connected</div>
+    </section>
+
+    <section class="card">
+      <h2>Mode</h2>
+      <div class="row">
+        <button id="test-btn">Apply testing preset</button>
+        <button id="actual-btn">Apply actual preset</button>
+        <button id="refresh-btn">Refresh state</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Current stock</h2>
+      <div id="stock-grid" class="stock-grid"></div>
+      <div class="row">
+        <button id="save-stock-btn">Save stock values</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Live summary</h2>
+      <pre id="summary"></pre>
+    </section>
+  </main>
+
+  <script src="./admin.js"></script>
+</body>
+</html>
