@@ -106,55 +106,50 @@ const fixedQuestions = [
 const adaptiveTemplates = [
   {
     id: "q4",
-    q: "Q4 – Adaptive Reset",
-    sub: "A stressful moment hits. Which response feels most natural?"
+    q: "Q4 – Feelings of Jitters",
+    sub: "After a few days, you receive an email. Your result for that assignment has been released. Your heart races"
   },
   {
     id: "q5",
-    q: "Q5 – Adaptive Motivation",
-    sub: "You feel yourself wavering. What helps you restart?"
+    q: "Q5 – Motivative Wavers",
+    sub: "You begin to feel slightly disconnected from why you started this journey"
   },
   {
     id: "q6",
-    q: "Q6 – Adaptive Celebration",
-    sub: "The week is over. How would you recharge?"
+    q: "Q6 – Celebration!",
+    sub: "Phew, the semester is finally over! How do you celebrate? "
   }
 ];
 
 const adaptiveOptionBank = {
   perry: {
-    
     q5: "Set one tiny achievable goal and begin there.",
-    q6: "Write down tomorrow’s priorities before resting."
+    q6: "Write a to-do-list of the future things to do, the world doesn't stop for anybody!"
   },
   ping: {
     
     q5: "Journal to reconnect to your bigger purpose",
-    q6: "Look back on what felt meaningful this semester."
+    q6: "Reflect on the past semester and how it aligns with what is meaningful to you!"
   },
   ola: {
     q4: "Move, stretch, or walk to release tension.",
-    q5: "Reset physically with fresh air and motion.",
-    q6: "Go for a walk and enjoy the outdoors."
+    q6: "Go for a walk in the nature and touch grass! The weather is so beautiful today!"
   },
   ty: {
     q4: "Eat a sweet treat to cheer yourself on!",
-    q5: "Nourish yourself so your energy can return.",
-    q6: "Treat yourself to food that feels comforting."
+    q6: "Buy some yummy food to satisfy all your cravings!."
   },
   sky: {
     q4: "Sleep; You want to avoid seeing your grades for now",
-    q5: "Protect your sleep and recover properly.",
-    q6: "Catch up on proper rest and sleep early."
+    q6: "Straight to bed! You spent too many nights stressing about school, time to catch up on some ZZs."
   },
   tobi: {
-    
     q5: "Take some time to do something you love and remind yourself of your passion",
-    q6: "Switch off and spend quiet time with your hobbies."
+    q6: "Switch off your phone and catch up on your hobbies- nothing can disturb you for the next few hours! "
   },
   iggy: {
     
     q5: "Talk to someone who understands.",
-    q6: "Celebrate by catching up with friends."
+    q6: "Catch up with friends- you did not get to spend much time with them during the exam period."
   }
 };
