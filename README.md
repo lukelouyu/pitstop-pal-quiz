@@ -17,6 +17,9 @@ This README is written for two groups:
 - **Storyline narrators:** Andrew Koh Wen Teik, Illiyina Qistina Ruimei Nizam
 - **Algorithm designer:** Liew Ting Yu
 - **Developer:** Luke Lou Yu
+- **Support:** Ms Vijayalakshmi D/O Vijayaratnam
+
+
 
 ---
 
